@@ -14,7 +14,9 @@ export default function App() {
   return (
     <Layout>
       <Canvas style={{ position: "absolute" }}>
-        <ambientLight />
+        <directionalLight shadow-mapSize={4096} castShadow position={[-4, 11, 4]} intensity={6} />
+        <ambientLight intensity={1}/>
+        <color attach={'background'} args={['#161616']}/>
         <ScrollControls pages={5} damping={0.2}>
           <ScrollManager />
           <Scene sceneAn={sceneAn}/>
