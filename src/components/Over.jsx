@@ -24,7 +24,7 @@ export default function Over({setSceneAn}) {
     };
   
     useFrame(() => {
-      const scrollData = (Math.round(scroll.offset * 10000) / 10000) * 4 + 1;
+      const scrollData = (Math.round(scroll.offset * 100) / 100) * 4 + 1;
   
       if (page == 1) {
         if (scrollData >= page + 0.0001 && scrollData < page + 0.8) {
