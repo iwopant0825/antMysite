@@ -74,7 +74,7 @@ export default function Scene({ sceneAn }) {
         <MacBook open={open} />
       </animated.mesh>
       <Section1Scene/>
-      {/* <ReactLogo/> */}
+    
     </>
   );
 }

@@ -86,7 +86,9 @@ export default function Over({ setSceneAn }) {
     } else {
       scroll.el.style.overflow = "auto";
     }
+    console.log(scrollData)
   });
+  
 
   return (
     <>

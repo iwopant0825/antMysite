@@ -3,7 +3,7 @@ import { Html } from "@react-three/drei";
 export default function Section1Scene() {
   return (
     <Html
-      style={{ backgroundColor: "#161616" }}
+      style={{ backgroundColor: "transparent" }}
       center
       transform
       occlude="blending"
