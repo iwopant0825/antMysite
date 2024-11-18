@@ -22,6 +22,7 @@ export default function Over({setSceneAn}) {
         behavior: "auto",
       });
     };
+
   
     useFrame(() => {
       const scrollData = (Math.round(scroll.offset * 100) / 100) * 4 + 1;
