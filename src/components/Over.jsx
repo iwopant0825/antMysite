@@ -90,7 +90,6 @@ export default function Over({ setSceneAn }) {
 
   return (
     <>
-   
       <div ref={test1} style={{ height: "100vh", width: "100%" }}>
         <Section1 />
       </div>
