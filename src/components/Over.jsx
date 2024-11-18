@@ -24,7 +24,7 @@ export default function Over({setSceneAn}) {
     };
   
     useFrame(() => {
-      const scrollData = scroll.offset * 4 + 1;
+      const scrollData = (Math.round(scroll.offset * 100) / 100) * 4 + 1;
   
       if (page == 1) {
         if (scrollData >= page + 0.0001 && scrollData < page + 0.8) {
@@ -74,17 +74,17 @@ export default function Over({setSceneAn}) {
         setpage(5);
       }
   
-      // if (
-      //   scrollData !== 1 &&
-      //   scrollData !== 2 &&
-      //   scrollData !== 3 &&
-      //   scrollData !== 4 &&
-      //   scrollData !== 5
-      // ) {
-      //   scroll.el.style.overflow = "hidden";
-      // } else {
-      //   scroll.el.style.overflow = "auto";
-      // }
+      if (
+        scrollData !== 1 &&
+        scrollData !== 2 &&
+        scrollData !== 3 &&
+        scrollData !== 4 &&
+        scrollData !== 5
+      ) {
+        scroll.el.style.overflow = "hidden";
+      } else {
+        scroll.el.style.overflow = "auto";
+      }
       console.log(`scrollData:${scrollData}`)
       console.log(`scroll.offset:${scroll.offset}`)
     });
