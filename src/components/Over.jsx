@@ -74,18 +74,19 @@ export default function Over({setSceneAn}) {
         setpage(5);
       }
   
-      if (
-        scrollData !== 1 &&
-        scrollData !== 2 &&
-        scrollData !== 3 &&
-        scrollData !== 4 &&
-        scrollData !== 5
-      ) {
-        scroll.el.style.overflow = "hidden";
-      } else {
-        scroll.el.style.overflow = "auto";
-      }
-      console.log(scroll.offset)
+      // if (
+      //   scrollData !== 1 &&
+      //   scrollData !== 2 &&
+      //   scrollData !== 3 &&
+      //   scrollData !== 4 &&
+      //   scrollData !== 5
+      // ) {
+      //   scroll.el.style.overflow = "hidden";
+      // } else {
+      //   scroll.el.style.overflow = "auto";
+      // }
+      console.log(`scrollData:${scrollData}`)
+      console.log(`scroll.offset:${scroll.offset}`)
     });
   
     return (
