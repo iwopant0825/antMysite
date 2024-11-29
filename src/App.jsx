@@ -6,13 +6,15 @@ import ScrollManager from "./components/ScrollManager";
 import Scene from "./components/Scene";
 import Over from "./components/Over";
 import { Canvas } from "@react-three/fiber";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import styled from "styled-components";
 import OverHeader from "./components/OverComponents/Header";
+import Loading from "./Loding";
 
 export default function App() {
   const [sceneAn, setSceneAn] = useState(1)
   return (
+    <Suspense fallback={<Loading/>}>
     <Layout>
       <OverHeader/>
       <Canvas style={{ position: "absolute" }}>
@@ -28,6 +30,7 @@ export default function App() {
         </ScrollControls>
       </Canvas>
     </Layout>
+    </Suspense>
   );
 }
 
