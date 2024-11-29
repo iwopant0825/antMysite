@@ -1,20 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { useSpring, animated } from '@react-spring/three'
 
 export function MacBook({open}) {
   const { nodes, materials, scene } = useGLTF('/mac.glb')
   const modelRef=useRef()
+  const {viewport} = useThree()
 
   const spring = useSpring({
     rotation : open? [-3.8, 0, 0] : [-1.925, 0, 0] 
   })
-
+  console.log(viewport.width)
 
   return (
-    <group scale={1.4} dispose={null}>
+    <group scale={viewport.width>6? viewport.width/9:viewport.width/4} dispose={null}>
       <animated.group position={[0, 0.1, -1.012]} rotation={spring.rotation} ref={modelRef}>
         <group rotation={[1.931, 0, 0]}>
           <mesh castShadow geometry={nodes.Object_11_1.geometry} material={materials['Material.003']} />

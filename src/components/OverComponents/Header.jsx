@@ -22,6 +22,9 @@ const HeaderLayout = styled.div`
   z-index: 999;
   align-items:center;
   justify-content:space-between;
+  @media (max-width: 600px) {
+    padding: 20px 20px;
+  }
 `;
 const List = styled.div`
   display: flex;

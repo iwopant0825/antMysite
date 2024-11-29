@@ -54,7 +54,7 @@ export default function Scene({ sceneAn }) {
 
     position:
       sceneAn == 2
-        ? [0, -1, 0]
+        ? [1.3, -0.5, 0]
         : sceneAn == 3
         ? [0, 0, 0]
         : sceneAn == 4

@@ -1,6 +1,6 @@
 import { useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Section1 from "./OverComponents/Section1";
 import Section2 from "./OverComponents/Section2";
 import Section3 from "./OverComponents/Section3";
@@ -22,6 +22,9 @@ export default function Over({setSceneAn}) {
         behavior: "auto",
       });
     };
+
+    useEffect(()=>{
+    },[])
 
   
     useFrame(() => {
@@ -87,8 +90,6 @@ export default function Over({setSceneAn}) {
       } else {
         scroll.el.style.overflow = "auto";
       }
-      console.log(`scrollData:${scrollData}`)
-      console.log(`scroll.offset:${scroll.offset}`)
     });
   
     return (
