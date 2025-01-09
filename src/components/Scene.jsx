@@ -1,6 +1,7 @@
-import { Box } from "@react-three/drei";
+import { Box, OrbitControls, Shape, Sphere } from "@react-three/drei";
 import { useSpring, animated } from "@react-spring/three";
 import * as THREE from "three";
+import { LogoModel } from "./LogoModel";
 
 export default function Scene({ sceneAn }) {
   // useFrame(({ mouse, camera }) => {
@@ -35,10 +36,9 @@ export default function Scene({ sceneAn }) {
 
   return (
     <>
+      <OrbitControls/>
       <animated.mesh rotation={rotation}>
-        <Box args={[1, 1, 1]}>
-          <meshNormalMaterial/>
-        </Box>
+        <LogoModel/>
       </animated.mesh>
     </>
   );

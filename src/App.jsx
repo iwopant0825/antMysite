@@ -19,15 +19,16 @@ export default function App() {
     <Suspense fallback={<Loading/>}>
     <Layout>
       <OverHeader scrollTest={scrollTest}/>
-      <Canvas style={{ position: "absolute" }}>
+      <Canvas orthographic camera={{ zoom: 50, position: [0, 0, 100] }} style={{ position: "absolute" }}>
         <Scene sceneAn={sceneAn}/>
-        <ambientLight />
+        <directionalLight position={[1,1,1]} intensity={10}/>
+        <ambientLight intensity={10}/>
         <ScrollControls pages={5} damping={0.3}>
           <ScrollManager />
           <Scroll html style={{ width: "100%",zIndex:10  }}>
             <Over setScrollTest={setScrollTest} setSceneAn={setSceneAn}/>
           </Scroll>
-          <Over3D/>
+          {/* <Over3D/> */}
         </ScrollControls>
       </Canvas>
     </Layout>
