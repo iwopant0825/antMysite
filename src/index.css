@@ -4,4 +4,25 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  font-family: "Pretendard-Thin";
+}
+@font-face {
+  font-family: "Pretendard-Light";
+  font-weight: normal;
+  src: url("../public/font/Pretendard-Light.otf") format("truetype");
+}
+@font-face {
+  font-family: "Pretendard-Medium";
+  font-weight: normal;
+  src: url("../public/font/Pretendard-Medium.otf") format("truetype");
+}
+@font-face {
+  font-family: "Pretendard-Thin";
+  font-weight: normal;
+  src: url("../public/font/Pretendard-Thin.otf") format("truetype");
+}
+@font-face {
+  font-family: "Pretendard-Regular";
+  font-weight: normal;
+  src: url("../public/font/Pretendard-Regular.otf") format("truetype");
 }
