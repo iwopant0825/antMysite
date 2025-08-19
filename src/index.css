@@ -27,18 +27,8 @@
   src: url("/font/Pretendard-Thin.otf") format("opentype");
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body { font-family: "Pretendard-Thin", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color: #111; background: #fff; }
 
-html, body, #root {
-  height: 100%;
-}
 
-body {
-  font-family: "Pretendard-Thin", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  color: #111;
-  background: #fff;
-}
