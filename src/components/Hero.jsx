@@ -105,27 +105,6 @@ My goal is to craft user-centered interfaces that combine performance, accessibi
 
         {/* inline 3D model is rendered near ChaHoRim via ModelOverlay */}
       </Container>
-      {isMobile && needsPerm && gyroReady !== true && (
-        <PermButton onClick={async () => {
-          try {
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-              const res = await DeviceOrientationEvent.requestPermission();
-              if (res === 'granted') {
-                setGyroReady(true);
-                setNeedsPerm(false);
-              } else {
-                setGyroReady(false);
-              }
-            } else {
-              // 일부 브라우저는 별도 권한 없이 동작
-              setGyroReady(null);
-              setNeedsPerm(false);
-            }
-          } catch (e) {
-            setGyroReady(false);
-          }
-        }}>센서 활성화</PermButton>
-      )}
     </Section>
   );
 }
@@ -440,7 +419,7 @@ function GyroGroup({ children, onReady, onUnsupported }) {
       base.current.gamma = lastRaw.current.gamma;
       lastReset.current = Date.now();
     };
-    const interval = setInterval(snap, 500);
+    const interval = setInterval(snap, 1000);
 
     let raf;
     const loop = () => {
