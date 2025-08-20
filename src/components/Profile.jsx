@@ -1,23 +1,23 @@
-import styled from 'styled-components'
-import Polygon from '/Polygon.svg'
+import styled from "styled-components";
+import Polygon from "/Polygon.svg";
 
 export default function Profile() {
   return (
     <Section>
       <Grid>
-        <LeftVisual>
-          <GlassCard />
-        </LeftVisual>
         <RightCopy>
-          <Kicker>Creative Community</Kicker>
+          <Kicker>개발자 차호림</Kicker>
           <Paragraph>
-            Whether you're a seasoned professional or a passionate hobbyist,
-            there's a place for you in our growing community.
+            저는 사용자 경험을 최우선으로 생각하는 프론트엔드 개발자입니다.
+            깔끔한 코드와 감각적인 디자인을 결합해 매끄럽고 반응형인 웹
+            인터페이스를 구현하는 데 집중합니다. React, Three.js, Tailwind 등
+            다양한 최신 기술을 활용하며, 단순한 화면을 넘어서 사용자와 소통하는
+            경험을 설계하는 것을 목표로 합니다. 항상 배우고 성장하며, 새로운
+            시도를 통해 더 나은 웹을 만들어가는 개발자가 되고자 합니다.
           </Paragraph>
 
           <StampRow>
-            <Stamp>24</Stamp>
-            <Flower />
+            <Stamp>Profile</Stamp>
           </StampRow>
 
           <BigTitle>
@@ -30,7 +30,7 @@ export default function Profile() {
         </RightCopy>
       </Grid>
     </Section>
-  )
+  );
 }
 
 const Section = styled.section`
@@ -38,6 +38,11 @@ const Section = styled.section`
   background: #ffffff;
   padding-top: 80px;
   padding-bottom: 160px;
+
+  @media (max-width: 860px) {
+    padding-left: 0;
+    padding-top: 40px;
+  }
 `;
 
 const Grid = styled.div`
@@ -48,23 +53,11 @@ const Grid = styled.div`
   grid-template-columns: 1.1fr 1.2fr;
   gap: 32px;
   align-items: start;
-`;
 
-const LeftVisual = styled.div`
-  position: relative;
-  height: 420px;
-`;
-
-const GlassCard = styled.div`
-  position: absolute;
-  left: -10%;
-  top: -10%;
-  width: 480px;
-  height: 360px;
-  background: linear-gradient(145deg, #b4f2ff 0%, #a68bff 50%, #6b5bff 100%);
-  border-radius: 40px;
-  filter: saturate(110%) contrast(105%);
-  transform: rotate(-12deg);
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
 `;
 
 const RightCopy = styled.div`
@@ -74,7 +67,7 @@ const RightCopy = styled.div`
 `;
 
 const Kicker = styled.h3`
-  color: #4f5dff;
+  color: #000000;
   font-size: 24px;
   font-weight: 800;
 `;
@@ -92,23 +85,13 @@ const StampRow = styled.div`
 `;
 
 const Stamp = styled.div`
-  color: #4f5dff;
+  color: #000000;
   font-weight: 800;
 `;
 
-const Flower = styled.div`
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #b5f3ff, #5b5bff 60%, #8a5bff 100%);
-  box-shadow: inset 0 0 12px rgba(255,255,255,0.6);
-`;
-
 const BigTitle = styled.h2`
-  color: #4f5dff;
+  color: #000000;
   font-weight: 900;
   font-size: clamp(48px, 8vw, 120px);
   line-height: 0.9;
 `;
-
-
