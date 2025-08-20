@@ -419,7 +419,7 @@ function GyroGroup({ children, onReady, onUnsupported }) {
       base.current.gamma = lastRaw.current.gamma;
       lastReset.current = Date.now();
     };
-    const interval = setInterval(snap, 1000);
+    const interval = setInterval(snap, 500);
 
     let raf;
     const loop = () => {
