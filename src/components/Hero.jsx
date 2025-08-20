@@ -20,6 +20,7 @@ export default function Hero() {
     typeof window !== 'undefined' ? window.innerWidth <= 860 : false
   );
   const [gyroReady, setGyroReady] = useState(null); // null: unknown, true: active, false: fallback
+  const [needsPerm, setNeedsPerm] = useState(false);
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth <= 860);
@@ -114,6 +115,27 @@ My goal is to craft user-centered interfaces that combine performance, accessibi
 
         {/* inline 3D model is rendered near ChaHoRim via ModelOverlay */}
       </Container>
+      {isMobile && needsPerm && gyroReady !== true && (
+        <PermButton onClick={async () => {
+          try {
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+              const res = await DeviceOrientationEvent.requestPermission();
+              if (res === 'granted') {
+                setGyroReady(true);
+                setNeedsPerm(false);
+              } else {
+                setGyroReady(false);
+              }
+            } else {
+              // 일부 브라우저는 별도 권한 없이 동작
+              setGyroReady(null);
+              setNeedsPerm(false);
+            }
+          } catch (e) {
+            setGyroReady(false);
+          }
+        }}>센서 활성화</PermButton>
+      )}
     </Section>
   );
 }
@@ -375,41 +397,50 @@ function GyroGroup({ children, onReady, onUnsupported }) {
   const ref = useRef(null);
   useEffect(() => {
     const handle = (e) => {
-      const beta = (e.beta || 0) * (Math.PI / 180); // x-axis
-      const gamma = (e.gamma || 0) * (Math.PI / 180); // y-axis
+      const beta = (e.beta ?? 0) * (Math.PI / 180); // x-axis (front/back tilt)
+      const gamma = (e.gamma ?? 0) * (Math.PI / 180); // y-axis (left/right tilt)
+      // 감도 증가: 배수 1.0, 각도 제한 ±60°
+      const targetX = THREE.MathUtils.clamp(beta * 1.0, -Math.PI / 3, Math.PI / 3);
+      const targetY = THREE.MathUtils.clamp(gamma * 1.0, -Math.PI / 3, Math.PI / 3);
       if (ref.current) {
-        ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, beta * 0.15, 0.1);
-        ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, gamma * 0.15, 0.1);
+        ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, targetX, 0.25);
+        ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, targetY, 0.25);
       }
     };
 
-    // iOS 13+ requires permission
-    let supported = false;
-    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-      DeviceMotionEvent.requestPermission()
-        .then((r) => {
-          if (r === 'granted') supported = true;
-        })
-        .catch(() => {})
-        .finally(() => {
-          if (supported) {
-            window.addEventListener('deviceorientation', handle, true);
-            onReady && onReady();
-          } else {
-            onUnsupported && onUnsupported();
-          }
-        });
+    // 권한 요청은 외부에서 처리. 여기선 리스너만 붙여본다.
+    let attached = false;
+    if (typeof window !== 'undefined' && 'DeviceOrientationEvent' in window) {
+      window.addEventListener('deviceorientation', handle, true);
+      attached = true;
+    }
+    if (!attached && 'ondeviceorientationabsolute' in window) {
+      window.addEventListener('deviceorientationabsolute', handle, true);
+      attached = true;
+    }
+    if (attached) {
+      onReady && onReady();
     } else {
-      if (typeof window !== 'undefined' && 'DeviceOrientationEvent' in window) {
-        window.addEventListener('deviceorientation', handle, true);
-        onReady && onReady();
-      } else {
-        onUnsupported && onUnsupported();
-      }
+      onUnsupported && onUnsupported();
     }
     return () => window.removeEventListener('deviceorientation', handle, true);
   }, []);
   return <group ref={ref}>{children}</group>;
 }
+
+const PermButton = styled.button`
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 88px;
+  z-index: 70;
+  padding: 10px 14px;
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  @media (min-width: 861px) { display: none; }
+`;
 
 
