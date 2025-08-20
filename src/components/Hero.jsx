@@ -19,6 +19,7 @@ export default function Hero() {
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth <= 860 : false
   );
+  const [gyroReady, setGyroReady] = useState(null); // null: unknown, true: active, false: fallback
 
   useEffect(() => {
     const handler = () => setIsMobile(window.innerWidth <= 860);
@@ -73,9 +74,18 @@ export default function Hero() {
               <MouseLight />
               <directionalLight position={[3, 5, 3]} intensity={0.9} />
               {isMobile ? (
-                <GyroGroup>
-                  <ResponsiveModel />
-                </GyroGroup>
+                gyroReady === true ? (
+                  <GyroGroup onReady={() => setGyroReady(true)} onUnsupported={() => setGyroReady(false)}>
+                    <ResponsiveModel />
+                  </GyroGroup>
+                ) : (
+                  <>
+                    <MouseParallax />
+                    <Center>
+                      <ResponsiveModel />
+                    </Center>
+                  </>
+                )
               ) : (
                 <>
                   <OrbitControls enableZoom={false} enablePan={false} enableDamping={false} />
@@ -361,7 +371,7 @@ function ResponsiveModel() {
 }
 
 // Gyro-controlled group: applies device orientation to group rotation
-function GyroGroup({ children }) {
+function GyroGroup({ children, onReady, onUnsupported }) {
   const ref = useRef(null);
   useEffect(() => {
     const handle = (e) => {
@@ -374,12 +384,28 @@ function GyroGroup({ children }) {
     };
 
     // iOS 13+ requires permission
+    let supported = false;
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-      DeviceMotionEvent.requestPermission().catch(() => {}).finally(() => {
-        window.addEventListener('deviceorientation', handle, true);
-      });
+      DeviceMotionEvent.requestPermission()
+        .then((r) => {
+          if (r === 'granted') supported = true;
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (supported) {
+            window.addEventListener('deviceorientation', handle, true);
+            onReady && onReady();
+          } else {
+            onUnsupported && onUnsupported();
+          }
+        });
     } else {
-      window.addEventListener('deviceorientation', handle, true);
+      if (typeof window !== 'undefined' && 'DeviceOrientationEvent' in window) {
+        window.addEventListener('deviceorientation', handle, true);
+        onReady && onReady();
+      } else {
+        onUnsupported && onUnsupported();
+      }
     }
     return () => window.removeEventListener('deviceorientation', handle, true);
   }, []);
