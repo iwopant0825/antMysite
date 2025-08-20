@@ -397,6 +397,8 @@ function ResponsiveModel() {
 function GyroGroup({ children, onReady, onUnsupported }) {
   const ref = useRef(null);
   const base = useRef({ beta: null, gamma: null });
+  const lastRaw = useRef({ beta: 0, gamma: 0 });
+  const lastEvent = useRef(Date.now());
   useEffect(() => {
     const handle = (e) => {
       const rawBeta = e.beta ?? 0; // degrees
@@ -406,6 +408,9 @@ function GyroGroup({ children, onReady, onUnsupported }) {
         base.current.beta = rawBeta;
         base.current.gamma = rawGamma;
       }
+      lastRaw.current.beta = rawBeta;
+      lastRaw.current.gamma = rawGamma;
+      lastEvent.current = Date.now();
       const beta = (rawBeta - base.current.beta) * (Math.PI / 180);
       const gamma = (rawGamma - base.current.gamma) * (Math.PI / 180);
       // 감도 증가: 배수 1.0, 각도 제한 ±60°
@@ -432,7 +437,28 @@ function GyroGroup({ children, onReady, onUnsupported }) {
     } else {
       onUnsupported && onUnsupported();
     }
-    return () => window.removeEventListener('deviceorientation', handle, true);
+
+    // idle-return loop: 1초 무동작 시 원위치로 복귀 후 기준점 갱신
+    let raf;
+    const loop = () => {
+      const idle = Date.now() - lastEvent.current > 1000;
+      if (idle && ref.current) {
+        ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, 0, 0.08);
+        ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, 0, 0.08);
+        if (Math.abs(ref.current.rotation.x) < 0.01 && Math.abs(ref.current.rotation.y) < 0.01) {
+          base.current.beta = lastRaw.current.beta;
+          base.current.gamma = lastRaw.current.gamma;
+        }
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+
+    return () => {
+      window.removeEventListener('deviceorientation', handle, true);
+      window.removeEventListener('deviceorientationabsolute', handle, true);
+      cancelAnimationFrame(raf);
+    };
   }, []);
   return <group ref={ref}>{children}</group>;
 }
