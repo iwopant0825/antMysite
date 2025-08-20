@@ -72,11 +72,19 @@ export default function Hero() {
               <ambientLight intensity={0.6} />
               <MouseLight />
               <directionalLight position={[3, 5, 3]} intensity={0.9} />
-              <OrbitControls enableZoom={false} enablePan={false} enableDamping={false} />
-              <MouseParallax />
-              <Center>
-                <ResponsiveModel />
-              </Center>
+              {isMobile ? (
+                <GyroGroup>
+                  <ResponsiveModel />
+                </GyroGroup>
+              ) : (
+                <>
+                  <OrbitControls enableZoom={false} enablePan={false} enableDamping={false} />
+                  <MouseParallax />
+                  <Center>
+                    <ResponsiveModel />
+                  </Center>
+                </>
+              )}
             </Canvas>
           </ModelOverlay>
         )}
@@ -350,6 +358,32 @@ function ResponsiveModel() {
   const t = (w - minW) / (maxW - minW);
   const s = minS + t * (maxS - minS);
   return <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={s} />;
+}
+
+// Gyro-controlled group: applies device orientation to group rotation
+function GyroGroup({ children }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const handle = (e) => {
+      const beta = (e.beta || 0) * (Math.PI / 180); // x-axis
+      const gamma = (e.gamma || 0) * (Math.PI / 180); // y-axis
+      if (ref.current) {
+        ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, beta * 0.15, 0.1);
+        ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, gamma * 0.15, 0.1);
+      }
+    };
+
+    // iOS 13+ requires permission
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+      DeviceMotionEvent.requestPermission().catch(() => {}).finally(() => {
+        window.addEventListener('deviceorientation', handle, true);
+      });
+    } else {
+      window.addEventListener('deviceorientation', handle, true);
+    }
+    return () => window.removeEventListener('deviceorientation', handle, true);
+  }, []);
+  return <group ref={ref}>{children}</group>;
 }
 
 
