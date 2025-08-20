@@ -46,30 +46,21 @@ export default function Hero() {
             />
           );
         })()}
-        {chaRect && (
-          <ModelOverlay
-            style={(() => {
-              const desktopSize = Math.min(420, Math.max(120, chaRect.height * 1.8));
-              if (isMobile) {
-                const vw = typeof window !== 'undefined' ? window.innerWidth : 360;
-                const size = Math.min(560, Math.max(220, vw * 1.05));
-                return {
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  top: 'calc(95dvh - 20px - ' + size + 'px)',
-                  bottom: 'auto',
-                  width: size,
-                  height: size,
-                };
-              }
-              return {
-                left: Math.max(8, chaRect.left - desktopSize - 16),
-                top: chaRect.top + chaRect.height / 2 - desktopSize / 2,
-                width: desktopSize,
-                height: desktopSize,
-              };
-            })()}
-          >
+        <ModelOverlay
+          style={(() => {
+            const vw = typeof window !== 'undefined' ? window.innerWidth : 1024;
+            const size = isMobile
+              ? Math.min(560, Math.max(220, vw * 1.05))
+              : Math.min(520, Math.max(260, vw * 0.28));
+            return {
+              left: '50%',
+              transform: 'translateX(-50%)',
+              bottom: 0,
+              width: size,
+              height: size,
+            };
+          })()}
+        >
             <Canvas orthographic camera={{ position: [0, 1.2, 25], zoom: 90 }} onWheel={(e) => e.stopPropagation()}>
               <ambientLight intensity={0.6} />
               <MouseLight />
@@ -97,8 +88,7 @@ export default function Hero() {
                 </>
               )}
             </Canvas>
-          </ModelOverlay>
-        )}
+        </ModelOverlay>
         <InfoCard>
           <InfoTitle>FE Developer</InfoTitle>
           <InfoText>
@@ -215,7 +205,7 @@ const Section = styled.section`
   --contentW: calc(100vw - var(--sidebar) - (var(--hpad) * 2));
 
   padding-left: var(--sidebar);
-  min-height: 100vh;
+  min-height: 875px;
   background: #ffffff;
   overflow-x: hidden; /* prevent accidental horizontal scroll */
 
@@ -228,6 +218,11 @@ const Section = styled.section`
 
 const Container = styled.div`
   position: relative;
+  min-height: inherit; /* stretch to section's min-height */
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
   padding: 40px 24px 80px;
 `;
 
