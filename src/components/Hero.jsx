@@ -399,6 +399,7 @@ function GyroGroup({ children, onReady, onUnsupported }) {
   const base = useRef({ beta: null, gamma: null });
   const lastRaw = useRef({ beta: 0, gamma: 0 });
   const lastEvent = useRef(Date.now());
+  const lastReset = useRef(Date.now());
   useEffect(() => {
     const handle = (e) => {
       const rawBeta = e.beta ?? 0; // degrees
@@ -438,17 +439,20 @@ function GyroGroup({ children, onReady, onUnsupported }) {
       onUnsupported && onUnsupported();
     }
 
-    // idle-return loop: 1초 무동작 시 원위치로 복귀 후 기준점 갱신
+    // periodic snap-to-zero: every 0.5s reset baseline and ease to zero for a short window
+    const snap = () => {
+      base.current.beta = lastRaw.current.beta;
+      base.current.gamma = lastRaw.current.gamma;
+      lastReset.current = Date.now();
+    };
+    const interval = setInterval(snap, 500);
+
     let raf;
     const loop = () => {
-      const idle = Date.now() - lastEvent.current > 1000;
-      if (idle && ref.current) {
-        ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, 0, 0.08);
-        ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, 0, 0.08);
-        if (Math.abs(ref.current.rotation.x) < 0.01 && Math.abs(ref.current.rotation.y) < 0.01) {
-          base.current.beta = lastRaw.current.beta;
-          base.current.gamma = lastRaw.current.gamma;
-        }
+      const since = Date.now() - lastReset.current;
+      if (since < 250 && ref.current) {
+        ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, 0, 0.15);
+        ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, 0, 0.15);
       }
       raf = requestAnimationFrame(loop);
     };
@@ -457,6 +461,7 @@ function GyroGroup({ children, onReady, onUnsupported }) {
     return () => {
       window.removeEventListener('deviceorientation', handle, true);
       window.removeEventListener('deviceorientationabsolute', handle, true);
+      clearInterval(interval);
       cancelAnimationFrame(raf);
     };
   }, []);
