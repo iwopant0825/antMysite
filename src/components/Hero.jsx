@@ -392,13 +392,22 @@ function ResponsiveModel() {
   return <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={s} />;
 }
 
+
 // Gyro-controlled group: applies device orientation to group rotation
 function GyroGroup({ children, onReady, onUnsupported }) {
   const ref = useRef(null);
+  const base = useRef({ beta: null, gamma: null });
   useEffect(() => {
     const handle = (e) => {
-      const beta = (e.beta ?? 0) * (Math.PI / 180); // x-axis (front/back tilt)
-      const gamma = (e.gamma ?? 0) * (Math.PI / 180); // y-axis (left/right tilt)
+      const rawBeta = e.beta ?? 0; // degrees
+      const rawGamma = e.gamma ?? 0; // degrees
+      // 최초 접속 시의 기기 방향을 기준점으로 삼음
+      if (base.current.beta === null || base.current.gamma === null) {
+        base.current.beta = rawBeta;
+        base.current.gamma = rawGamma;
+      }
+      const beta = (rawBeta - base.current.beta) * (Math.PI / 180);
+      const gamma = (rawGamma - base.current.gamma) * (Math.PI / 180);
       // 감도 증가: 배수 1.0, 각도 제한 ±60°
       const targetX = THREE.MathUtils.clamp(beta * 1.0, -Math.PI / 3, Math.PI / 3);
       const targetY = THREE.MathUtils.clamp(gamma * 1.0, -Math.PI / 3, Math.PI / 3);
