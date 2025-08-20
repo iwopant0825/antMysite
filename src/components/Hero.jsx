@@ -1,7 +1,9 @@
 import styled from "styled-components";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import { useLayoutEffect, useRef } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { OrbitControls, Center } from "@react-three/drei";
+import * as THREE from "three";
+import { LogoModel } from "./LogoModel";
 
 function Box() {
   return (
@@ -18,25 +20,33 @@ export default function Hero() {
       <Container>
         <FitBigWords lines={["FE", "DEVELOPER", "Interactive", "Web"]} />
         <InfoCard>
-          <InfoTitle>PrismCraft</InfoTitle>
+          <InfoTitle>FE Developer</InfoTitle>
           <InfoText>
-            Whether you're an experienced professional or just starting your journey
-            in the world of 3D design
+          I specialize in building interactive and responsive web experiences that adapt seamlessly across devices.
+With a focus on clean code and modern frameworks, I transform complex ideas into efficient and scalable solutions.
+My goal is to craft user-centered interfaces that combine performance, accessibility, and elegant design.
           </InfoText>
         </InfoCard>
 
         <HeroGrid>
           <LeftRail />
-          <Center3D>
-            <Canvas camera={{ position: [2.8, 2.8, 4.2] }}>
-              <ambientLight intensity={0.7} />
-              
-              <directionalLight position={[3, 5, 2]} intensity={1.2} />
-              <Box />
-            </Canvas>
-          </Center3D>
           <RightRail />
         </HeroGrid>
+
+        <ModelWrap>
+          <ModelInner>
+            <Canvas orthographic camera={{ position: [0, 1.2, 25], zoom: 90 }}>
+              <ambientLight intensity={0.6} />
+              <MouseLight />
+              <directionalLight position={[3, 5, 3]} intensity={0.9} />
+              <OrbitControls enableZoom={false} enableDamping={false} />
+              <MouseParallax />
+              <Center>
+                <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={0.12} />
+              </Center>
+            </Canvas>
+          </ModelInner>
+        </ModelWrap>
       </Container>
     </Section>
   );
@@ -126,7 +136,7 @@ const BigWords = styled.div`
 const InfoCard = styled.div`
   position: relative;
   margin-left: 260px;
-  margin-top: 80px;
+  margin-top: 40px;
   max-width: 360px;
 `;
 
@@ -147,7 +157,7 @@ const HeroGrid = styled.div`
   grid-template-columns: 1fr minmax(520px, 700px) 1fr;
   gap: 20px;
   align-items: end;
-  margin-top: 200px;
+  margin-top: 120px;
 `;
 
 const LeftRail = styled.div``;
@@ -160,5 +170,63 @@ const Center3D = styled.div`
 `;
 
 const RightRail = styled.div``;
+
+const ModelWrap = styled.div`
+  position: relative;
+  margin-top: 120px;
+  border-radius: 24px;
+  overflow: hidden;
+  height: clamp(300px, 50vh, 520px);
+  z-index: 1; /* keep below absolute BigWords (z-index default stacking) */
+  width: min(72%, 1100px);
+  margin-left: auto;
+  margin-right: auto;
+`;
+
+const ModelInner = styled.div`
+  width: 100%;
+  height: 100%;
+`;
+
+function MouseLight() {
+  const ref = useRef(null);
+  const { viewport } = useThree();
+  useFrame(({ mouse }) => {
+    if (!ref.current) return;
+    const x = (mouse.x * viewport.width) / 2;
+    const y = (mouse.y * viewport.height) / 2;
+    ref.current.position.set(x, y, 20);
+  });
+  return <pointLight ref={ref} intensity={1.4} distance={80} decay={2} />;
+}
+
+function MouseParallax() {
+  const { viewport } = useThree();
+  if (viewport && viewport.width > 6) {
+    useFrame(({ mouse, camera }) => {
+      camera.position.x = THREE.MathUtils.lerp(
+        camera.position.x,
+        mouse.x * 1,
+        0.03
+      );
+      camera.position.y = THREE.MathUtils.lerp(
+        camera.position.y,
+        mouse.y * 1,
+        0.01
+      );
+      camera.position.z = THREE.MathUtils.lerp(
+        camera.position.z,
+        Math.max(4, Math.abs(mouse.x * mouse.y * 4)),
+        0.01
+      );
+      camera.rotation.y = THREE.MathUtils.lerp(
+        camera.rotation.y,
+        mouse.x * -Math.PI * 0.025,
+        0.001
+      );
+    });
+  }
+  return null;
+}
 
 
