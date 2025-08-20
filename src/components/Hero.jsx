@@ -413,20 +413,24 @@ function GyroGroup({ children, onReady, onUnsupported }) {
       onUnsupported && onUnsupported();
     }
 
-    // periodic snap-to-zero: every 0.5s reset baseline and ease to zero for a short window
+    // periodic snap-to-zero: every 0.5s reset baseline and ease to zero smoothly
+    const RESET_INTERVAL = 500; // ms
     const snap = () => {
       base.current.beta = lastRaw.current.beta;
       base.current.gamma = lastRaw.current.gamma;
       lastReset.current = Date.now();
     };
-    const interval = setInterval(snap, 500);
+    const interval = setInterval(snap, RESET_INTERVAL);
 
     let raf;
     const loop = () => {
       const since = Date.now() - lastReset.current;
-      if (since < 250 && ref.current) {
-        ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, 0, 0.15);
-        ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, 0, 0.15);
+      const RETURN_WINDOW = 450; // ms, 부드럽게 돌아오는 구간
+      if (since < RETURN_WINDOW && ref.current) {
+        // 작은 보간 계수로 스무스하게 복귀
+        const k = 0.08;
+        ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, 0, k);
+        ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, 0, k);
       }
       raf = requestAnimationFrame(loop);
     };
