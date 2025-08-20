@@ -74,17 +74,17 @@ export default function Hero() {
               <MouseLight />
               <directionalLight position={[3, 5, 3]} intensity={0.9} />
               {isMobile ? (
-                gyroReady === true ? (
-                  <GyroGroup onReady={() => setGyroReady(true)} onUnsupported={() => setGyroReady(false)}>
-                    <ResponsiveModel />
-                  </GyroGroup>
-                ) : (
+                gyroReady === false ? (
                   <>
                     <MouseParallax />
                     <Center>
                       <ResponsiveModel />
                     </Center>
                   </>
+                ) : (
+                  <GyroGroup onReady={() => setGyroReady(true)} onUnsupported={() => setGyroReady(false)}>
+                    <ResponsiveModel />
+                  </GyroGroup>
                 )
               ) : (
                 <>
