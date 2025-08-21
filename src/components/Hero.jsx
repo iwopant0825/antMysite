@@ -24,6 +24,11 @@ export default function Hero() {
   );
   const [gyroReady, setGyroReady] = useState(null); // null: unknown, true: active, false: fallback
   const [needsPerm, setNeedsPerm] = useState(false);
+  const [rainbowProgress, setRainbowProgress] = useState(0); // 0 → 1 fill amount for Interactive Web
+  const rainbowRef = useRef(0);
+  const touchStartYRef = useRef(null);
+  const sectionRef = useRef(null);
+  const isCoarseRef = useRef(false);
 
   useEffect(() => {
     const handler = () => {
@@ -34,8 +39,71 @@ export default function Hero() {
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
+
+  // Detect coarse pointer (touch) to tune sensitivity
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mql = window.matchMedia('(pointer: coarse)');
+    const set = () => { isCoarseRef.current = !!mql.matches; };
+    set();
+    if (mql.addEventListener) mql.addEventListener('change', set);
+    else if (mql.addListener) mql.addListener(set);
+    return () => {
+      if (mql.removeEventListener) mql.removeEventListener('change', set);
+      else if (mql.removeListener) mql.removeListener(set);
+    };
+  }, []);
+
+  // wheel/touch gating at top: fill/unfill rainbow before allowing scroll
+  const applyDeltaToRainbow = (delta) => {
+    const baseK = 0.003;
+    const k = isCoarseRef.current ? 0.0006 : (isMobile ? 0.0015 : baseK); // 터치 장치에서 더 느리게
+    const next = Math.max(0, Math.min(1, rainbowRef.current + delta * k));
+    rainbowRef.current = next;
+    setRainbowProgress(next);
+  };
+
+  // Add non-passive native listeners to allow preventDefault without warnings
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const handleWheel = (e) => {
+      const atTop = (typeof window !== 'undefined' ? (window.scrollY || document.documentElement.scrollTop) : 0) <= 2;
+      if (!atTop) return;
+      const dy = e.deltaY;
+      if ((dy > 0 && rainbowRef.current < 1) || (dy < 0 && rainbowRef.current > 0)) {
+        e.preventDefault();
+        e.stopPropagation();
+        applyDeltaToRainbow(dy);
+      }
+    };
+    const handleTouchStart = (e) => {
+      touchStartYRef.current = e.touches && e.touches[0] ? e.touches[0].clientY : null;
+    };
+    const handleTouchMove = (e) => {
+      const atTop = (typeof window !== 'undefined' ? (window.scrollY || document.documentElement.scrollTop) : 0) <= 2;
+      if (!atTop) return;
+      if (touchStartYRef.current == null) return;
+      const y = e.touches && e.touches[0] ? e.touches[0].clientY : touchStartYRef.current;
+      const dy = touchStartYRef.current - y;
+      if ((dy > 0 && rainbowRef.current < 1) || (dy < 0 && rainbowRef.current > 0)) {
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+        const gain = isCoarseRef.current ? 0.45 : 1; // 터치에서 추가 감속
+        applyDeltaToRainbow(dy * gain);
+      }
+    };
+    el.addEventListener('wheel', handleWheel, { passive: false, capture: true });
+    el.addEventListener('touchstart', handleTouchStart, { passive: true, capture: true });
+    el.addEventListener('touchmove', handleTouchMove, { passive: false, capture: true });
+    return () => {
+      el.removeEventListener('wheel', handleWheel, { capture: true });
+      el.removeEventListener('touchstart', handleTouchStart, { capture: true });
+      el.removeEventListener('touchmove', handleTouchMove, { capture: true });
+    };
+  }, []);
   return (
-    <Section>
+    <Section ref={sectionRef}>
       <Container>
         {(() => {
           const lines = isMobile
@@ -50,6 +118,7 @@ export default function Hero() {
             <FitBigWords
               lines={lines}
               onMeasureCha={setChaRect}
+              rainbowProgress={rainbowProgress}
             />
           );
         })()}
@@ -142,7 +211,7 @@ My goal is to craft user-centered interfaces that combine performance, accessibi
   );
 }
 
-function FitBigWords({ lines, onMeasureCha }) {
+function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
   const containerRef = useRef(null);
   const spansRef = useRef([]);
   const containerRORef = useRef(null);
@@ -150,6 +219,7 @@ function FitBigWords({ lines, onMeasureCha }) {
   const lastWidthRef = useRef(0);
   const fittingRef = useRef(false);
   const lastChaRectRef = useRef({ left: null, top: null, width: null, height: null });
+  const rainbowIdxRef = useRef(-1);
 
   useLayoutEffect(() => {
     const base = 320; // base font size to measure from
@@ -198,6 +268,16 @@ function FitBigWords({ lines, onMeasureCha }) {
           span.style.fontSize = Math.floor(size * scale) + 'px';
         });
       }
+
+      // measure indices
+      const idxInteractive = lines.findIndex((t) =>
+        String(t)
+          .replace(/&nbsp;/g, '')
+          .replace(/\s+/g, '')
+          .toUpperCase()
+          .includes('INTERACTIVEWEB')
+      );
+      rainbowIdxRef.current = idxInteractive;
 
       // measure ChaHoRim span rect and notify only on actual changes
       const idx = lines.findIndex((t) =>
@@ -259,6 +339,59 @@ function FitBigWords({ lines, onMeasureCha }) {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [lines]);
+
+  // Apply rainbow fill behind the Interactive Web line using an absolutely-positioned child
+  useLayoutEffect(() => {
+    const idx = rainbowIdxRef.current;
+    if (idx < 0) return;
+    const span = spansRef.current[idx];
+    if (!span) return;
+    const p = Math.max(0, Math.min(1, rainbowProgress));
+    span.style.position = 'relative';
+    span.style.zIndex = '1';
+    span.style.color = '';
+
+    let fill = span.querySelector(':scope > .__rainbow_fill');
+    if (!fill) {
+      fill = document.createElement('div');
+      fill.className = '__rainbow_fill';
+      fill.style.position = 'absolute';
+      fill.style.left = '0';
+      fill.style.top = '50%';
+      fill.style.transform = 'translateY(-50%)';
+      fill.style.height = '110%';
+      fill.style.borderRadius = '0px';
+      fill.style.pointerEvents = 'none';
+      fill.style.background = 'linear-gradient(90deg, #ff0040, #ff8a00, #ffd400, #2bdc00, #00c2ff, #7a00ff)';
+      fill.style.opacity = '0.8';
+      fill.style.zIndex = '0';
+      span.appendChild(fill);
+    }
+    const spanW = span.offsetWidth || span.scrollWidth || 0;
+    const spanH = span.offsetHeight || 0;
+    fill.style.height = Math.max(8, Math.round(spanH * 1.1)) + 'px';
+    fill.style.width = Math.round(spanW * p) + 'px';
+
+    let white = span.querySelector(':scope > .__white_text');
+    if (!white) {
+      white = document.createElement('span');
+      white.className = '__white_text';
+      white.textContent = span.textContent;
+      white.style.position = 'absolute';
+      white.style.left = '0';
+      white.style.top = '0';
+      white.style.whiteSpace = 'inherit';
+      white.style.letterSpacing = 'inherit';
+      white.style.lineHeight = 'inherit';
+      white.style.font = 'inherit';
+      white.style.pointerEvents = 'none';
+      white.style.color = '#fff';
+      white.style.overflow = 'hidden';
+      white.style.zIndex = '2';
+      span.appendChild(white);
+    }
+    white.style.width = Math.round(spanW * p) + 'px';
+  }, [rainbowProgress]);
 
   const isStrong = (text) => {
     const normalized = String(text)
