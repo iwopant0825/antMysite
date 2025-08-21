@@ -204,7 +204,7 @@ export default function Hero() {
             const vw = typeof window !== "undefined" ? window.innerWidth : 1024;
             // 모바일: 하단 중앙 고정 배치
             if (isMobile || !chaRect) {
-              const size = Math.min(560, Math.max(220, vw * 1.05));
+              const size = Math.min(620, Math.max(220, vw * 1.12));
               return {
                 left: "50%",
                 transform: "translateX(-50%)",
@@ -216,13 +216,13 @@ export default function Hero() {
             // 데스크톱/태블릿: ChaHoRim의 왼쪽 중앙에 배치, 크기는 글자 높이에 비례
             // 테블릿에서 ChaHoRim의 높이가 상대적으로 커질 수 있으니 안전하게 보정
             const desktopSize = Math.min(
-              isTablet ? 380 : 440,
+              isTablet ? 440 : 520,
               Math.max(
-                150,
-                Math.round(chaRect.height * (isTablet ? 1.25 : 1.45))
+                180,
+                Math.round(chaRect.height * (isTablet ? 1.35 : 1.7))
               )
             );
-            const gapLeft = isTablet ? 12 : 16;
+            const gapLeft = isTablet ? 16 : 20;
             return {
               left: Math.max(
                 8,
@@ -240,13 +240,16 @@ export default function Hero() {
         >
           <Canvas
             orthographic
-            camera={{ position: [0, 1.2, 25], zoom: 90 }}
+            camera={{ position: [0, 1.2, 28], zoom: 95 }}
             onWheel={(e) => {
               // 기본 스크롤은 허용하고, 상위 리스너로의 전파만 차단
               e.stopPropagation();
             }}
             style={{
               touchAction: isMobile || isTablet ? "pan-y pinch-zoom" : "auto",
+              // 캔버스에 여유 패딩을 줘서 회전 시 잘림 방지
+              width: "100%",
+              height: "100%",
             }}
           >
             <ambientLight intensity={0.6} />
@@ -365,38 +368,34 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
         lastWidthRef.current = width;
       }
 
-      // vertical cap only on small screens to prevent double scroll
-      const isNarrow =
-        typeof window !== "undefined" ? window.innerWidth <= 860 : false;
-      if (isNarrow) {
-        const GAP_PX = 24; // must match BigWords grid gap
-        const LINE_HEIGHT = 0.8; // must match BigWords line-height
-        const host = container.parentElement; // Container
-        const hostH = host
-          ? host.clientHeight
-          : typeof window !== "undefined"
-          ? window.innerHeight
-          : 900;
-        const verticalPadding = 40; // headroom to avoid touching bottom
-        const capH = hostH - verticalPadding; // strict cap to avoid extra height on small screens
+      // vertical cap: ensure lines fit into host height across all widths
+      const GAP_PX = 24; // must match BigWords grid gap
+      const LINE_HEIGHT = 0.8; // must match BigWords line-height
+      const host = container.parentElement; // Container
+      const hostH = host
+        ? host.clientHeight
+        : typeof window !== "undefined"
+        ? window.innerHeight
+        : 900;
+      const verticalPadding = 40; // headroom to avoid touching bottom
+      const capH = hostH - verticalPadding;
 
-        let totalHeight = 0;
-        let lineCount = 0;
+      let totalHeight = 0;
+      let lineCount = 0;
+      spansRef.current.forEach((span) => {
+        if (!span) return;
+        const size = parseFloat(span.style.fontSize) || 0;
+        totalHeight += size * LINE_HEIGHT;
+        lineCount += 1;
+      });
+      totalHeight += GAP_PX * Math.max(0, lineCount - 1);
+      if (totalHeight > 0 && capH > 0 && totalHeight > capH) {
+        const scale = Math.max(0.5, Math.min(1, capH / totalHeight));
         spansRef.current.forEach((span) => {
           if (!span) return;
           const size = parseFloat(span.style.fontSize) || 0;
-          totalHeight += size * LINE_HEIGHT;
-          lineCount += 1;
+          span.style.fontSize = Math.floor(size * scale) + "px";
         });
-        totalHeight += GAP_PX * Math.max(0, lineCount - 1);
-        if (totalHeight > 0 && capH > 0 && totalHeight > capH) {
-          const scale = Math.max(0.5, Math.min(1, capH / totalHeight));
-          spansRef.current.forEach((span) => {
-            if (!span) return;
-            const size = parseFloat(span.style.fontSize) || 0;
-            span.style.fontSize = Math.floor(size * scale) + "px";
-          });
-        }
       }
 
       // measure indices
@@ -565,7 +564,8 @@ const Section = styled.section`
   --contentW: calc(100% - var(--sidebar) - (var(--hpad) * 2));
 
   padding-left: var(--sidebar);
-  min-height: 1075px;
+  /* 절대 배치된 요소가 포함되어 있어 기본 높이를 보장 */
+  min-height: clamp(820px, 100dvh, 1200px);
   background: #ffffff;
   overflow-x: hidden; /* prevent accidental horizontal scroll */
   overflow-y: clip; /* prevent absolute children from growing page height */
@@ -584,10 +584,8 @@ const Section = styled.section`
   /* Mobile (≤1100): 상단 고정 헤더(72px)를 제외하고 꽉 차게 */
   @media (max-width: 1100px) {
     margin-top: 72px;
-    min-height: min(
-      calc(100dvh - 72px),
-      820px
-    ); /* prevent excessive growth on ultra-tall */
+    /* 너무 작거나 너무 커지지 않도록 안전 범위 */
+    min-height: clamp(680px, calc(100dvh - 72px), 980px);
     --sidebar: 0px;
     padding-left: 0;
   }
