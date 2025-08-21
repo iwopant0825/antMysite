@@ -9,13 +9,12 @@ export default function Immersion() {
   const [progress, setProgress] = useState(0); // 0: top-down, 1: front
   const targetRef = useRef(0);
   const rafRef = useRef(0);
-  const engagedRef = useRef(false); // 한 번 시작하면 진행이 0으로 돌아오기 전까진 유지
+  const engagedRef = useRef(false);
   const currentProgressRef = useRef(0);
-  const wheelAccumRef = useRef(0);
-  const touchAccumRef = useRef(0);
+  const scrollAccumRef = useRef(0);
+  const lastScrollYRef = useRef(0);
 
-  // 반응형 디바이스 판별
-  const [device, setDevice] = useState("desktop"); // 'mobile' | 'tablet' | 'desktop'
+  const [device, setDevice] = useState("desktop");
   useEffect(() => {
     const detect = () => {
       const w = window.innerWidth || 1200;
@@ -24,7 +23,7 @@ export default function Immersion() {
       else setDevice("desktop");
     };
     detect();
-    window.addEventListener("resize", detect);
+    window.addEventListener("resize", detect, { passive: true });
     return () => window.removeEventListener("resize", detect);
   }, []);
 
@@ -53,7 +52,6 @@ export default function Immersion() {
       rafRef.current = requestAnimationFrame(step);
     };
 
-    // 헤더(72px)를 고려한 가시비율 계산
     const isVisibleEnough = () => {
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight || 1;
@@ -62,118 +60,64 @@ export default function Immersion() {
       const topVisible = Math.min(rect.bottom, vh) - Math.max(rect.top, header);
       const visible = Math.max(0, topVisible);
       const ratio = visible / Math.min(usable, rect.height || usable);
-      // 모바일은 약간 완화, 데스크톱은 엄격
       const need =
         device === "mobile" ? 0.92 : device === "tablet" ? 0.95 : 0.98;
       return ratio >= need;
     };
 
-    const shouldHandle = () => {
-      if (engagedRef.current) return true;
-      if (isVisibleEnough()) {
-        engagedRef.current = true;
-        wheelAccumRef.current = 0;
-        touchAccumRef.current = 0;
-        return true;
-      }
-      return false;
-    };
-
-    // 디바이스별 스냅 임계값
-    const TRIGGER = device === "mobile" ? 200 : device === "tablet" ? 180 : 160;
-    const CLAIM = device === "mobile" ? 28 : 12; // 제스처 선점 임계값
+    const TRIGGER = device === "mobile" ? 260 : device === "tablet" ? 240 : 220;
 
     const snapTo = (dir) => {
-      if (dir > 0) targetRef.current = 1; // 정면
-      else targetRef.current = 0; // 바닥
+      targetRef.current = dir > 0 ? 1 : 0;
+      engagedRef.current = true;
       ensureRAF();
     };
 
-    const onWheel = (e) => {
-      if (!shouldHandle()) return;
-      const dy = e.deltaY || 0;
-      // 끝 상태에서 반대쪽으로 더 스크롤되면 기본 스크롤 허용
-      const atStart =
-        currentProgressRef.current <= 0.001 && targetRef.current <= 0.001;
-      const atEnd =
-        currentProgressRef.current >= 0.999 && targetRef.current >= 0.999;
-      if ((atStart && dy < 0) || (atEnd && dy > 0)) return; // 기본 스크롤 진행
-      if (e.cancelable) e.preventDefault();
-      e.stopPropagation();
-      wheelAccumRef.current += dy;
-      if (wheelAccumRef.current >= TRIGGER) {
-        wheelAccumRef.current = 0;
-        snapTo(1);
-      } else if (wheelAccumRef.current <= -TRIGGER) {
-        wheelAccumRef.current = 0;
-        snapTo(-1);
+    const resetAccumIfLeaving = () => {
+      if (!isVisibleEnough()) {
+        scrollAccumRef.current = 0;
+        engagedRef.current = false;
       }
     };
 
-    let touchStartY = null;
-    const onTouchStart = (e) => {
-      touchStartY = e.touches?.[0]?.clientY ?? null;
-      touchAccumRef.current = 0;
-    };
-    const onTouchMove = (e) => {
-      // 터치는 shouldHandle 대신 가시성으로만 게이트 → 기본 스크롤 방해 최소화
-      if (!isVisibleEnough() || touchStartY == null) return;
-      const y = e.touches?.[0]?.clientY ?? touchStartY;
-      const dy = touchStartY - y;
-      const atStart =
-        currentProgressRef.current <= 0.001 && targetRef.current <= 0.001;
-      const atEnd =
-        currentProgressRef.current >= 0.999 && targetRef.current >= 0.999;
-      if ((atStart && dy < 0) || (atEnd && dy > 0)) return; // 반대방향→기본 스크롤
-
-      const nextAccum = touchAccumRef.current + dy;
-      // CLAIM 전까지는 항상 기본 스크롤 허용 (preventDefault 금지)
-      if (Math.abs(nextAccum) < CLAIM && atStart) {
-        touchAccumRef.current = nextAccum;
-        touchStartY = y;
+    const onScroll = () => {
+      resetAccumIfLeaving();
+      if (!isVisibleEnough()) {
+        lastScrollYRef.current = window.scrollY;
         return;
       }
+      const atStart =
+        currentProgressRef.current <= 0.001 && targetRef.current <= 0.001;
+      const atEnd =
+        currentProgressRef.current >= 0.999 && targetRef.current >= 0.999;
+      const y = window.scrollY;
+      const dy = y - (lastScrollYRef.current || y);
+      lastScrollYRef.current = y;
 
-      // 여기부터 인터랙션 선점
-      if (e.cancelable) e.preventDefault();
-      e.stopPropagation();
-      engagedRef.current = true; // 선점 시점에만 활성화
-      touchAccumRef.current = nextAccum;
-      touchStartY = y;
-      if (touchAccumRef.current >= TRIGGER) {
-        touchAccumRef.current = 0;
+      if (dy === 0) return;
+      if ((atStart && dy < 0) || (atEnd && dy > 0)) return; // 반대방향은 통과
+
+      // 섹션 내부에서만 누적
+      const rect = el.getBoundingClientRect();
+      const center = rect.top + rect.height / 2;
+      const header = 72;
+      const within = center > header && center < (window.innerHeight || 0);
+      if (!within) return;
+
+      scrollAccumRef.current += dy;
+      if (scrollAccumRef.current >= TRIGGER) {
+        scrollAccumRef.current = 0;
         snapTo(1);
-      } else if (touchAccumRef.current <= -TRIGGER) {
-        touchAccumRef.current = 0;
+      } else if (scrollAccumRef.current <= -TRIGGER) {
+        scrollAccumRef.current = 0;
         snapTo(-1);
       }
     };
-    const onTouchEnd = () => {
-      touchAccumRef.current = 0;
-      touchStartY = null;
-    };
 
-    window.addEventListener("wheel", onWheel, {
-      passive: false,
-      capture: true,
-    });
-    window.addEventListener("touchstart", onTouchStart, {
-      passive: true,
-      capture: true,
-    });
-    window.addEventListener("touchmove", onTouchMove, {
-      passive: false,
-      capture: true,
-    });
-    window.addEventListener("touchend", onTouchEnd, {
-      passive: true,
-      capture: true,
-    });
+    lastScrollYRef.current = window.scrollY;
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      window.removeEventListener("wheel", onWheel, { capture: true });
-      window.removeEventListener("touchstart", onTouchStart, { capture: true });
-      window.removeEventListener("touchmove", onTouchMove, { capture: true });
-      window.removeEventListener("touchend", onTouchEnd, { capture: true });
+      window.removeEventListener("scroll", onScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = 0;
     };
@@ -188,14 +132,13 @@ export default function Immersion() {
         <Canvas
           orthographic
           camera={{ position: [0, 25, 0.001], zoom: 70 }}
-          style={{ touchAction: device === "desktop" ? "auto" : "pan-y" }}
+          style={{ touchAction: "auto" }}
         >
           <CameraRig progress={progress} device={device} />
           <color attach="background" args={["#ffffff"]} />
           <ambientLight intensity={0.6} />
           <directionalLight position={[5, 10, 5]} intensity={0.9} />
           <GroundWords device={device} />
-          {/** 모바일/태블릿에서는 OrbitControls 자체를 비활성화하여 터치 기본 스크롤 방해 제거 */}
           <OrbitControls
             enabled={device === "desktop"}
             enableRotate={false}
@@ -339,6 +282,9 @@ const Section = styled.section`
   padding-bottom: 120px;
   scroll-margin-top: 84px;
   position: relative;
+  touch-action: pan-y;
+  -ms-touch-action: pan-y;
+  overscroll-behavior-y: auto;
 
   @media (max-width: 1100px) {
     padding-left: 0;

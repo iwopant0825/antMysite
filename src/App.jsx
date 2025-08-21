@@ -4,7 +4,7 @@ import Profile from "./components/Profile";
 import Skills from "./components/Skills";
 import Immersion from "./components/Immersion";
 import Projects from "./components/Projects";
-import Contact from "./components/Contact";
+import Timeline from "./components/Timeline";
 import Footer from "./components/Footer";
 
 export default function App() {
@@ -13,10 +13,10 @@ export default function App() {
       <Header />
       <Hero />
       <Profile />
-      <Immersion />
+      {/* <Immersion /> */}
       <Skills />
+      <Timeline />
       <Projects />
-      <Contact />
       <Footer />
     </>
   );

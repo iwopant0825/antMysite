@@ -56,8 +56,8 @@ export default function Header() {
           <NavAnchor href="#projects" onClick={onNavClick}>
             Projects
           </NavAnchor>
-          <NavAnchor href="#contact" onClick={onNavClick}>
-            Contact
+          <NavAnchor href="#timeline" onClick={onNavClick}>
+            Timeline
           </NavAnchor>
         </Nav>
         <RightGroup>
@@ -90,7 +90,7 @@ const Aside = styled.aside`
   background: transparent;
   z-index: 60;
   border-right: 1px solid #e0e0e0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgb(255, 255, 255);
   /* initial reveal animation (desktop): left -> right */
   clip-path: inset(0 100% 0 0);
   animation: ${keyframes`from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}`}

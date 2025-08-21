@@ -76,25 +76,40 @@ const Cards = styled.div`
 `;
 
 const Card = styled.div`
-  border: 1px solid #eee;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #fafafa;
-  padding: 16px;
+  border: 1px solid #d9d9dc;
+  border-radius: 0; /* 각진 테두리 */
+  background: #ffffff;
+  padding: 20px;
+  transition: border-color 200ms ease, transform 200ms ease,
+    box-shadow 200ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: #111214;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  }
 `;
 
 const Thumb = styled.div`
-  height: 160px;
-  background: linear-gradient(135deg, #f0f0f0, #e7e7e7);
-  border-radius: 12px;
+  aspect-ratio: 16 / 10;
+  background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.06) 0%,
+      rgba(255, 255, 255, 0) 100%
+    ),
+    repeating-linear-gradient(135deg, #0f1012 0 8px, #141518 8px 16px);
+  border: 1px solid #cfcfd4;
+  border-radius: 0; /* 각진 썸네일 */
 `;
 
 const CardTitle = styled.h4`
-  margin-top: 12px;
-  color: #000;
+  margin-top: 14px;
+  color: #0b0c0e;
+  font-weight: 800;
 `;
 
 const CardText = styled.p`
-  color: #555;
-  line-height: 1.6;
+  color: #3b3f45;
+  line-height: 1.65;
+  margin-top: 6px;
 `;
