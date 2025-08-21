@@ -1,7 +1,7 @@
 import styled, { keyframes } from "styled-components";
 import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, Center } from "@react-three/drei";
+import { OrbitControls, Center, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { LogoModel } from "./LogoModel";
 
@@ -146,7 +146,7 @@ export default function Hero() {
               return {
                 left: '50%',
                 transform: 'translateX(-50%)',
-                bottom: 0,
+                bottom: 12,
                 width: size,
                 height: size,
               };
@@ -213,14 +213,18 @@ export default function Hero() {
               )}
             </Canvas>
         </ModelOverlay>
-        <InfoCard>
-          <InfoTitle>FE Developer</InfoTitle>
+        {/* <InfoCard>
+          <InfoTitle>
+            <Typewriter text="FE Developer" speed={80} startDelay={120} />
+          </InfoTitle>
           <InfoText>
-          I specialize in building interactive and responsive web experiences that adapt seamlessly across devices.
-With a focus on clean code and modern frameworks, I transform complex ideas into efficient and scalable solutions.
-My goal is to craft user-centered interfaces that combine performance, accessibility, and elegant design.
+            <Typewriter
+              text={"I specialize in building interactive and responsive web experiences that adapt seamlessly across devices. With a focus on clean code and modern frameworks, I transform complex ideas into efficient and scalable solutions. My goal is to craft user-centered interfaces that combine performance, accessibility, and elegant design."}
+              speed={120}
+              startDelay={520}
+            />
           </InfoText>
-        </InfoCard>
+        </InfoCard> */}
 
         <HeroGrid>
           <LeftRail />
@@ -282,7 +286,7 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
         const host = container.parentElement; // Container
         const hostH = host ? host.clientHeight : (typeof window !== 'undefined' ? window.innerHeight : 900);
         const verticalPadding = 40; // headroom to avoid touching bottom
-        const capH = Math.max(800, hostH) - verticalPadding; // stable cap near Section min-height
+        const capH = hostH - verticalPadding; // strict cap to avoid extra height on small screens
 
         let totalHeight = 0;
         let lineCount = 0;
@@ -467,8 +471,9 @@ const Section = styled.section`
   overflow-y: clip;   /* prevent absolute children from growing page height */
   overscroll-behavior-y: contain; /* prevent scroll chaining */
 
+  /* Tablet (861–1299): viewport height 기반으로 유동 */
   @media (max-width: 1299px) and (min-width: 861px) {
-    min-height: 840px;
+    min-height: 100dvh;
   }
 
   /* 모바일/소형 태블릿에서는 텍스트가 잘리지 않도록 섹션의 세로 오버플로우 허용 */
@@ -476,9 +481,10 @@ const Section = styled.section`
     overflow-y: visible;
   }
 
+  /* Mobile (≤1100): 상단 고정 헤더(72px)를 제외하고 꽉 차게 */
   @media (max-width: 1100px) {
-    margin-top: 100px;
-    min-height: 800px;
+    margin-top: 72px;
+    min-height: min(calc(100dvh - 72px), 820px); /* prevent excessive growth on ultra-tall */
     --sidebar: 0px;
     padding-left: 0;
   }
@@ -499,7 +505,11 @@ const BigWords = styled.div`
   inset: 0 auto auto 0; /* left:0; top:0 */
   width: var(--contentW);
   pointer-events: none;
-  font-weight: 800;
+  font-family: "Pretendard-Medium", "Pretendard-Regular", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  font-weight: 500; /* 실제 포함된 가중치로 고정 */
+  font-synthesis: none; /* 브라우저의 가짜 Bold 생성 방지 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   line-height: 0.8;
   letter-spacing: -0.02em;
   display: grid;
@@ -508,8 +518,8 @@ const BigWords = styled.div`
   word-break: break-word;
   white-space: normal;
 
-  span { display: block; white-space: nowrap; color: rgba(0,0,0,0.2); }
-  span.strong { color: #000000; }
+  span { display: block; white-space: nowrap; color: rgba(0,0,0,0.2); font-weight: inherit; }
+  span.strong { color: #000000; font-weight: inherit; }
   
   @media (max-width: 1299px) and (min-width: 861px) {
     width: min(92vw, var(--contentW));
@@ -518,8 +528,8 @@ const BigWords = styled.div`
 
   /* 모바일/소형 태블릿에서는 좌우 여백을 더 확보해 잘림 방지 */
   @media (max-width: 1100px) {
-    width: min(94vw, var(--contentW));
-    gap: 20px;
+    width: min(92vw, var(--contentW));
+    gap: 14px; /* reduce gap on small widths */
   }
 `;
 
@@ -538,18 +548,20 @@ const Line = styled.span`
 
 const InfoCard = styled.div`
   position: relative;
-  margin-left: clamp(24px, 12vw, 260px);
-  margin-top: clamp(16px, 4vw, 40px);
+  margin-left: calc(clamp(24px, 12vw, 260px) + 200px);
+  margin-top: clamp(-24px, -1.8vw, 20px); /* 더 살짝 아래로 */
   width: min(36ch, 40vw);
   max-width: 520px;
 
   @media (max-width: 1299px) and (min-width: 861px) {
-    margin-left: clamp(24px, 10vw, 200px);
+    margin-left: calc(clamp(24px, 10vw, 200px) + 100px);
+    margin-top: clamp(-16px, -1.5vw, 18px);
     width: min(38ch, 48vw);
   }
 
   @media (max-width: 1024px) {
-    margin-left: clamp(16px, 6vw, 120px);
+    margin-left: calc(clamp(16px, 6vw, 120px) + 12px);
+    margin-top: clamp(-8px, -1vw, 18px);
     width: min(42ch, 56vw);
   }
 
@@ -561,16 +573,20 @@ const InfoCard = styled.div`
 `;
 
 const InfoTitle = styled.div`
-  color: #000000;
+  color: #111111;
   font-weight: 700;
   margin-bottom: 10px;
   font-size: clamp(16px, 2.2vw, 20px);
+  -webkit-text-stroke: 0.35px rgba(255, 255, 255, 0.45);
+  text-shadow: 0 1px 1px rgb(255, 255, 255);
 `;
 
 const InfoText = styled.p`
-  color: #3b3f45;
+  color: #2f343a;
   font-size: clamp(13px, 1.8vw, 14px);
   line-height: 1.6;
+  -webkit-text-stroke: 0.25px rgba(255,255,255,0.35);
+  text-shadow: 0 1px 1px rgb(255, 255, 255);
 `;
 
 const HeroGrid = styled.div`
@@ -698,6 +714,34 @@ function Appear3D({ initialScale = 0.04, children }) {
     return () => cancelAnimationFrame(raf);
   }, [initialScale]);
   return <group ref={group}>{children}</group>;
+}
+
+function Typewriter({ text, speed = 30, startDelay = 0 }) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    let timerId = 0;
+    let loopId = 0;
+    const start = () => {
+      // speed: chars per second
+      const tickMs = 16; // ~60fps
+      const charsPerTick = Math.max(1, Math.round((speed * tickMs) / 1000));
+      loopId = window.setInterval(() => {
+        setShown((s) => {
+          if (s >= text.length) {
+            window.clearInterval(loopId);
+            return s;
+          }
+          return Math.min(text.length, s + charsPerTick);
+        });
+      }, tickMs);
+    };
+    if (startDelay > 0) timerId = window.setTimeout(start, startDelay); else start();
+    return () => {
+      if (timerId) window.clearTimeout(timerId);
+      if (loopId) window.clearInterval(loopId);
+    };
+  }, [text, speed, startDelay]);
+  return <span>{text.slice(0, shown)}</span>;
 }
 
 function ResponsiveModel() {
