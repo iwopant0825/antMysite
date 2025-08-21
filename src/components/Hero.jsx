@@ -61,7 +61,15 @@ export default function Hero() {
             };
           })()}
         >
-            <Canvas orthographic camera={{ position: [0, 1.2, 25], zoom: 90 }} onWheel={(e) => e.stopPropagation()}>
+            <Canvas
+              orthographic
+              camera={{ position: [0, 1.2, 25], zoom: 90 }}
+              onWheel={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              style={{ touchAction: 'none' }}
+            >
               <ambientLight intensity={0.6} />
               <MouseLight />
               <directionalLight position={[3, 5, 3]} intensity={0.9} />
@@ -112,44 +120,93 @@ My goal is to craft user-centered interfaces that combine performance, accessibi
 function FitBigWords({ lines, onMeasureCha }) {
   const containerRef = useRef(null);
   const spansRef = useRef([]);
+  const containerRORef = useRef(null);
+  const rafRef = useRef(0);
+  const lastWidthRef = useRef(0);
+  const fittingRef = useRef(false);
+  const lastChaRectRef = useRef({ left: null, top: null, width: null, height: null });
 
   useLayoutEffect(() => {
     const base = 320; // base font size to measure from
-    const fit = () => {
+    const fitNow = () => {
       const container = containerRef.current;
       if (!container) return;
-      const width = container.clientWidth;
-      spansRef.current.forEach((span) => {
-        if (!span) return;
-        span.style.fontSize = base + "px";
-        const ratio = width / span.scrollWidth;
-        // grow/shrink to fit the available width (no artificial upper cap)
-        const size = Math.max(56, base * ratio);
-        span.style.fontSize = size + "px";
-      });
+      if (fittingRef.current) return;
+      fittingRef.current = true;
 
-      // measure ChaHoRim span rect and notify
+      const width = Math.round(container.clientWidth);
+      if (width !== lastWidthRef.current) {
+        spansRef.current.forEach((span) => {
+          if (!span) return;
+          span.style.fontSize = base + "px";
+          const sw = span.scrollWidth || 1;
+          const ratio = width / sw;
+          const size = Math.max(56, Math.floor(base * ratio)); // stabilize with floor rounding
+          span.style.fontSize = size + "px";
+        });
+        lastWidthRef.current = width;
+      }
+
+      // measure ChaHoRim span rect and notify only on actual changes
       const idx = lines.findIndex((t) =>
-        String(t).replace(/&nbsp;/g, "").toUpperCase().includes("CHAHORIM")
+        String(t).replace(/&nbsp;/g, '').toUpperCase().includes('CHAHORIM')
       );
       if (idx >= 0 && spansRef.current[idx]) {
         const spanEl = spansRef.current[idx];
         const sRect = spanEl.getBoundingClientRect();
         const cRect = container.getBoundingClientRect();
-        onMeasureCha &&
-          onMeasureCha({
-            left: sRect.left - cRect.left,
-            top: sRect.top - cRect.top,
-            width: sRect.width,
-            height: sRect.height,
-          });
+        const nextRect = {
+          left: sRect.left - cRect.left,
+          top: sRect.top - cRect.top,
+          width: sRect.width,
+          height: sRect.height,
+        };
+        const prev = lastChaRectRef.current;
+        const changed =
+          prev.left === null ||
+          Math.abs(prev.left - nextRect.left) > 0.5 ||
+          Math.abs(prev.top - nextRect.top) > 0.5 ||
+          Math.abs(prev.width - nextRect.width) > 0.5 ||
+          Math.abs(prev.height - nextRect.height) > 0.5;
+        if (changed) {
+          lastChaRectRef.current = nextRect;
+          onMeasureCha && onMeasureCha(nextRect);
+        }
       }
+
+      fittingRef.current = false;
     };
-    fit();
-    const on = () => fit();
-    window.addEventListener("resize", on);
-    return () => window.removeEventListener("resize", on);
-  }, []);
+
+    const scheduleFit = () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(fitNow);
+    };
+
+    // initial precise measure after fonts load
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => scheduleFit()).catch(() => scheduleFit());
+    } else {
+      scheduleFit();
+    }
+
+    // observe container width only (stable trigger)
+    const ro = new ResizeObserver(() => scheduleFit());
+    containerRORef.current = ro;
+    if (containerRef.current) ro.observe(containerRef.current);
+
+    // window resize fallback
+    const on = () => scheduleFit();
+    window.addEventListener('resize', on);
+
+    return () => {
+      window.removeEventListener('resize', on);
+      if (containerRORef.current && containerRef.current) {
+        containerRORef.current.unobserve(containerRef.current);
+      }
+      if (containerRORef.current) containerRORef.current.disconnect();
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [lines]);
 
   const isStrong = (text) => {
     const normalized = String(text)
@@ -181,15 +238,17 @@ const Section = styled.section`
   /* layout */
   --sidebar: 220px;
   --hpad: 24px; /* horizontal padding inside container */
-  --contentW: calc(100vw - var(--sidebar) - (var(--hpad) * 2));
+  --contentW: calc(100% - var(--sidebar) - (var(--hpad) * 2));
 
   padding-left: var(--sidebar);
   min-height: 875px;
   background: #ffffff;
   overflow-x: hidden; /* prevent accidental horizontal scroll */
+  overscroll-behavior-y: contain; /* prevent scroll chaining */
 
   @media (max-width: 860px) {
     margin-top: 100px;
+    min-height: 800px;
     --sidebar: 0px;
     padding-left: 0;
   }
@@ -207,16 +266,14 @@ const Container = styled.div`
 
 const BigWords = styled.div`
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
+  inset: 0 auto auto 0; /* left:0; top:0 */
+  width: var(--contentW);
   pointer-events: none;
   font-weight: 800;
   line-height: 0.8;
   letter-spacing: -0.02em;
   display: grid;
   gap: 24px;
-  max-width: var(--contentW);
   overflow-wrap: anywhere;
   word-break: break-word;
   white-space: normal;
@@ -280,8 +337,9 @@ const RightRail = styled.div``;
 const ModelOverlay = styled.div`
   position: absolute;
   z-index: 2;
-  pointer-events: auto;
+  pointer-events: none; /* avoid blocking page scroll */
   transition: top 0.15s ease, left 0.15s ease, width 0.15s ease, height 0.15s ease;
+  canvas { pointer-events: auto; }
 `;
 
 const ModelWrap = styled.div`
