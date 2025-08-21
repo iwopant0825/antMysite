@@ -1,4 +1,4 @@
-import styled, { css } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import { useState } from "react";
 import LogoSvg from "/Logo.svg";
 
@@ -48,6 +48,10 @@ const Aside = styled.aside`
   z-index: 60;
   border-right: 1px solid #e0e0e0;
   background: rgba(255, 255, 255, 0.9);
+  /* initial reveal animation (desktop): left -> right */
+  clip-path: inset(0 100% 0 0);
+  animation: ${keyframes`from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}`} .6s cubic-bezier(.2,.7,.2,1) .1s forwards;
+  will-change: clip-path;
 
   @media (max-width: 1100px) {
     inset: 0 0 auto 0;
@@ -62,6 +66,10 @@ const Aside = styled.aside`
     border-bottom: 1px solid #e0e0e0;
     background: rgba(255,255,255,0.9);
     backdrop-filter: blur(6px);
+    /* mobile reveal: top -> bottom */
+    clip-path: inset(0 0 100% 0);
+    animation: ${keyframes`from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}`} .5s cubic-bezier(.2,.7,.2,1) .05s forwards;
+    will-change: clip-path;
   }
 `;
 

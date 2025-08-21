@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { useLayoutEffect, useRef, useState, useEffect } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Center } from "@react-three/drei";
@@ -70,7 +70,8 @@ export default function Hero() {
   // wheel/touch gating at top: fill/unfill rainbow before allowing scroll
   const applyDeltaToRainbow = (delta) => {
     const baseK = 0.003;
-    const k = isCoarseRef.current ? 0.0006 : (isMobile ? 0.0015 : baseK); // 터치 장치에서 더 느리게
+    // 모바일 터치에서 더 적은 스와이프로 채워지도록 민감도 상향
+    const k = isCoarseRef.current ? 0.001 : (isMobile ? 0.0015 : baseK);
     const next = Math.max(0, Math.min(1, rainbowRef.current + delta * k));
     rainbowRef.current = next;
     setRainbowProgress(next);
@@ -102,7 +103,8 @@ export default function Hero() {
       if ((dy > 0 && rainbowRef.current < 1) || (dy < 0 && rainbowRef.current > 0)) {
         if (e.cancelable) e.preventDefault();
         e.stopPropagation();
-        const gain = isCoarseRef.current ? 0.45 : 1; // 터치에서 추가 감속
+        // 터치 장치에서 추가 증폭으로 더 적은 드래그로 채워지게 함
+        const gain = isCoarseRef.current ? 0.8 : 1;
         applyDeltaToRainbow(dy * gain);
       }
     };
@@ -183,13 +185,17 @@ export default function Hero() {
                   <>
                     <MouseParallax />
                     <Center>
-                      <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={0.1} />
+                      <Appear3D initialScale={0.06}>
+                        <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={0.1} />
+                      </Appear3D>
                     </Center>
                   </>
                 ) : (
                   <GyroGroup onReady={() => setGyroReady(true)} onUnsupported={() => setGyroReady(false)}>
                     <Center>
-                      <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={0.1} />
+                      <Appear3D initialScale={0.06}>
+                        <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={0.1} />
+                      </Appear3D>
                     </Center>
                   </GyroGroup>
                 )
@@ -198,7 +204,9 @@ export default function Hero() {
                   <OrbitControls enableZoom={false} enablePan={false} enableDamping={false} enableRotate={false} />
                   <Center>
                     <MouseOrient pageMouseRef={pageMouseRef}>
-                      <ResponsiveModel />
+                      <Appear3D initialScale={0.045}>
+                        <ResponsiveModel />
+                      </Appear3D>
                     </MouseOrient>
                   </Center>
                 </>
@@ -420,13 +428,14 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
       {lines.map((t, i) => {
         const display = String(t).replace(/&nbsp;/g, '\u00A0');
         return (
-          <span
+          <Line
             key={i}
             className={isStrong(t) ? 'strong' : ''}
             ref={(el) => (spansRef.current[i] = el)}
+            style={{ '--delay': `${i * 120}ms` }}
           >
             {display}
-          </span>
+          </Line>
         );
       })}
     </BigWords>
@@ -457,7 +466,7 @@ const Section = styled.section`
 
   @media (max-width: 1100px) {
     margin-top: 100px;
-    min-height: 800px;
+    min-height: 700px;
     --sidebar: 0px;
     padding-left: 0;
   }
@@ -500,6 +509,19 @@ const BigWords = styled.div`
     width: min(94vw, var(--contentW));
     gap: 20px;
   }
+`;
+
+const slideIn = keyframes`
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+`;
+
+const Line = styled.span`
+  animation-name: ${slideIn};
+  animation-duration: 600ms;
+  animation-timing-function: cubic-bezier(.2,.7,.2,1);
+  animation-fill-mode: both;
+  animation-delay: var(--delay, 0ms);
 `;
 
 const InfoCard = styled.div`
@@ -643,6 +665,27 @@ function MouseOrient({ pageMouseRef, children }) {
     ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, targetY, 0.08);
   });
   return <group ref={ref}>{children}</group>;
+}
+
+function Appear3D({ initialScale = 0.04, children }) {
+  const group = useRef();
+  useEffect(() => {
+    let raf;
+    const start = performance.now();
+    const dur = 650;
+    const tick = () => {
+      if (!group.current) return;
+      const t = Math.min(1, (performance.now() - start) / dur);
+      const e = 1 - Math.pow(1 - t, 3);
+      const s = initialScale + (1 - initialScale) * e;
+      group.current.scale.set(s, s, s);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    group.current.scale.set(initialScale, initialScale, initialScale);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [initialScale]);
+  return <group ref={group}>{children}</group>;
 }
 
 function ResponsiveModel() {
