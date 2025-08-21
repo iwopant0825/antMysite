@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export default function Projects() {
   return (
-    <Section>
+    <Section id="projects" tabIndex={-1}>
       <Grid>
         <Header>
           <Kicker>Projects</Kicker>
@@ -14,8 +14,8 @@ export default function Projects() {
               <Thumb />
               <CardTitle>Project #{i + 1}</CardTitle>
               <CardText>
-                인터랙티브 웹 실험과 3D 요소를 결합한 데모 프로젝트입니다. 반응형,
-                접근성, 성능을 고려해 제작했습니다.
+                인터랙티브 웹 실험과 3D 요소를 결합한 데모 프로젝트입니다.
+                반응형, 접근성, 성능을 고려해 제작했습니다.
               </CardText>
             </Card>
           ))}
@@ -30,6 +30,7 @@ const Section = styled.section`
   background: #ffffff;
   padding-top: 80px;
   padding-bottom: 140px;
+  scroll-margin-top: 84px;
 
   @media (max-width: 1100px) {
     padding-left: 0;
@@ -97,5 +98,3 @@ const CardText = styled.p`
   color: #555;
   line-height: 1.6;
 `;
-
-

@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export default function Skills() {
   return (
-    <Section>
+    <Section id="skills" tabIndex={-1}>
       <Grid>
         <Left>
           <Kicker>Skills</Kicker>
@@ -10,11 +10,21 @@ export default function Skills() {
         </Left>
         <Right>
           <List>
-            <li><strong>Languages</strong> — TypeScript, JavaScript, HTML, CSS</li>
-            <li><strong>Frameworks</strong> — React, Vite, React Three Fiber, Drei</li>
-            <li><strong>Styling</strong> — styled-components, Tailwind(경험)</li>
-            <li><strong>3D</strong> — three.js, gltfjsx, @react-spring/three</li>
-            <li><strong>Infra</strong> — GitHub Actions, Vercel</li>
+            <li>
+              <strong>Languages</strong> — TypeScript, JavaScript, HTML, CSS
+            </li>
+            <li>
+              <strong>Frameworks</strong> — React, Vite, React Three Fiber, Drei
+            </li>
+            <li>
+              <strong>Styling</strong> — styled-components, Tailwind(경험)
+            </li>
+            <li>
+              <strong>3D</strong> — three.js, gltfjsx, @react-spring/three
+            </li>
+            <li>
+              <strong>Infra</strong> — GitHub Actions, Vercel
+            </li>
           </List>
         </Right>
       </Grid>
@@ -27,6 +37,7 @@ const Section = styled.section`
   background: #f8f8f8;
   padding-top: 80px;
   padding-bottom: 120px;
+  scroll-margin-top: 84px;
 
   @media (max-width: 1100px) {
     padding-left: 0;
@@ -69,8 +80,10 @@ const List = styled.ul`
   display: grid;
   gap: 12px;
   color: #3b3f45;
-  li { line-height: 1.6; }
-  strong { color: #000; }
+  li {
+    line-height: 1.6;
+  }
+  strong {
+    color: #000;
+  }
 `;
-
-

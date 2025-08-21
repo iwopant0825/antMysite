@@ -3,7 +3,7 @@ import Polygon from "/Polygon.svg";
 
 export default function Profile() {
   return (
-    <Section>
+    <Section id="profile" tabIndex={-1}>
       <Grid>
         <RightCopy>
           <Kicker>개발자 차호림</Kicker>
@@ -38,6 +38,7 @@ const Section = styled.section`
   background: #ffffff;
   padding-top: 80px;
   padding-bottom: 160px;
+  scroll-margin-top: 84px;
 
   @media (max-width: 860px) {
     padding-left: 0;

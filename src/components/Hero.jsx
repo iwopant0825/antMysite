@@ -17,15 +17,19 @@ function Box() {
 export default function Hero() {
   const [chaRect, setChaRect] = useState(null);
   const [isMobile, setIsMobile] = useState(
-    typeof window !== 'undefined' ? window.innerWidth <= 1100 : false
+    typeof window !== "undefined" ? window.innerWidth <= 1100 : false
   );
   const [isTablet, setIsTablet] = useState(
-    typeof window !== 'undefined' ? (window.innerWidth >= 861 && window.innerWidth <= 1299) : false
+    typeof window !== "undefined"
+      ? window.innerWidth >= 861 && window.innerWidth <= 1299
+      : false
   );
   const [gyroReady, setGyroReady] = useState(null); // null: unknown, true: active, false: fallback
   const [needsPerm, setNeedsPerm] = useState(false);
   const [rainbowProgress, setRainbowProgress] = useState(0); // 0 → 1 fill amount for Interactive Web
   const rainbowRef = useRef(0);
+  const rainbowTargetRef = useRef(0);
+  const rainbowAnimRef = useRef(0);
   const touchStartYRef = useRef(null);
   const sectionRef = useRef(null);
   const isCoarseRef = useRef(false);
@@ -37,20 +41,22 @@ export default function Hero() {
       setIsMobile(w <= 1100);
       setIsTablet(w >= 861 && w <= 1299);
     };
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
   }, []);
 
   // Detect coarse pointer (touch) to tune sensitivity
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mql = window.matchMedia('(pointer: coarse)');
-    const set = () => { isCoarseRef.current = !!mql.matches; };
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mql = window.matchMedia("(pointer: coarse)");
+    const set = () => {
+      isCoarseRef.current = !!mql.matches;
+    };
     set();
-    if (mql.addEventListener) mql.addEventListener('change', set);
+    if (mql.addEventListener) mql.addEventListener("change", set);
     else if (mql.addListener) mql.addListener(set);
     return () => {
-      if (mql.removeEventListener) mql.removeEventListener('change', set);
+      if (mql.removeEventListener) mql.removeEventListener("change", set);
       else if (mql.removeListener) mql.removeListener(set);
     };
   }, []);
@@ -63,18 +69,45 @@ export default function Hero() {
       pageMouseRef.current.x = (e.clientX / w) * 2 - 1;
       pageMouseRef.current.y = (e.clientY / h) * 2 - 1;
     };
-    window.addEventListener('mousemove', onMove, { passive: true });
-    return () => window.removeEventListener('mousemove', onMove);
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
-  // wheel/touch gating at top: fill/unfill rainbow before allowing scroll
+  useEffect(() => {
+    return () => {
+      if (rainbowAnimRef.current) cancelAnimationFrame(rainbowAnimRef.current);
+    };
+  }, []);
+
+  // wheel/touch gating at top: 목표 진행률로 누적 후 RAF 보간으로 부드럽게 반영
+  const ensureRainbowAnimating = () => {
+    if (rainbowAnimRef.current) return;
+    const step = () => {
+      const target = Math.max(0, Math.min(1, rainbowTargetRef.current));
+      const current = rainbowRef.current;
+      const diff = target - current;
+      const ad = Math.abs(diff);
+      const lerpK = isCoarseRef.current ? 0.22 : 0.18;
+      const next = ad < 0.001 ? target : current + diff * lerpK;
+      rainbowRef.current = next;
+      setRainbowProgress(next);
+      if (Math.abs(target - next) >= 0.001) {
+        rainbowAnimRef.current = requestAnimationFrame(step);
+      } else {
+        rainbowAnimRef.current = 0;
+      }
+    };
+    rainbowAnimRef.current = requestAnimationFrame(step);
+  };
   const applyDeltaToRainbow = (delta) => {
-    const baseK = 0.003;
-    // 모바일 터치에서 더 적은 스와이프로 채워지도록 민감도 상향
-    const k = isCoarseRef.current ? 0.001 : (isMobile ? 0.0015 : baseK);
-    const next = Math.max(0, Math.min(1, rainbowRef.current + delta * k));
-    rainbowRef.current = next;
-    setRainbowProgress(next);
+    const baseK = 0.0009;
+    const k = isCoarseRef.current ? 0.0012 : isMobile ? 0.0011 : baseK;
+    const nextTarget = Math.max(
+      0,
+      Math.min(1, rainbowTargetRef.current + delta * k)
+    );
+    rainbowTargetRef.current = nextTarget;
+    ensureRainbowAnimating();
   };
 
   // Add non-passive native listeners to allow preventDefault without warnings
@@ -82,25 +115,41 @@ export default function Hero() {
     const el = sectionRef.current;
     if (!el) return;
     const handleWheel = (e) => {
-      const atTop = (typeof window !== 'undefined' ? (window.scrollY || document.documentElement.scrollTop) : 0) <= 2;
+      const atTop =
+        (typeof window !== "undefined"
+          ? window.scrollY || document.documentElement.scrollTop
+          : 0) <= 2;
       if (!atTop) return;
       const dy = e.deltaY;
-      if ((dy > 0 && rainbowRef.current < 1) || (dy < 0 && rainbowRef.current > 0)) {
+      if (
+        (dy > 0 && rainbowRef.current < 1) ||
+        (dy < 0 && rainbowRef.current > 0)
+      ) {
         e.preventDefault();
         e.stopPropagation();
         applyDeltaToRainbow(dy);
       }
     };
     const handleTouchStart = (e) => {
-      touchStartYRef.current = e.touches && e.touches[0] ? e.touches[0].clientY : null;
+      touchStartYRef.current =
+        e.touches && e.touches[0] ? e.touches[0].clientY : null;
     };
     const handleTouchMove = (e) => {
-      const atTop = (typeof window !== 'undefined' ? (window.scrollY || document.documentElement.scrollTop) : 0) <= 2;
+      const atTop =
+        (typeof window !== "undefined"
+          ? window.scrollY || document.documentElement.scrollTop
+          : 0) <= 2;
       if (!atTop) return;
       if (touchStartYRef.current == null) return;
-      const y = e.touches && e.touches[0] ? e.touches[0].clientY : touchStartYRef.current;
+      const y =
+        e.touches && e.touches[0]
+          ? e.touches[0].clientY
+          : touchStartYRef.current;
       const dy = touchStartYRef.current - y;
-      if ((dy > 0 && rainbowRef.current < 1) || (dy < 0 && rainbowRef.current > 0)) {
+      if (
+        (dy > 0 && rainbowRef.current < 1) ||
+        (dy < 0 && rainbowRef.current > 0)
+      ) {
         if (e.cancelable) e.preventDefault();
         e.stopPropagation();
         // 터치 장치에서 추가 증폭으로 더 적은 드래그로 채워지게 함
@@ -108,17 +157,26 @@ export default function Hero() {
         applyDeltaToRainbow(dy * gain);
       }
     };
-    el.addEventListener('wheel', handleWheel, { passive: false, capture: true });
-    el.addEventListener('touchstart', handleTouchStart, { passive: true, capture: true });
-    el.addEventListener('touchmove', handleTouchMove, { passive: false, capture: true });
+    el.addEventListener("wheel", handleWheel, {
+      passive: false,
+      capture: true,
+    });
+    el.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+      capture: true,
+    });
+    el.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+      capture: true,
+    });
     return () => {
-      el.removeEventListener('wheel', handleWheel, { capture: true });
-      el.removeEventListener('touchstart', handleTouchStart, { capture: true });
-      el.removeEventListener('touchmove', handleTouchMove, { capture: true });
+      el.removeEventListener("wheel", handleWheel, { capture: true });
+      el.removeEventListener("touchstart", handleTouchStart, { capture: true });
+      el.removeEventListener("touchmove", handleTouchMove, { capture: true });
     };
   }, []);
   return (
-    <Section ref={sectionRef}>
+    <Section id="hero" ref={sectionRef} tabIndex={-1}>
       <Container>
         {(() => {
           const lines = isMobile
@@ -127,7 +185,9 @@ export default function Hero() {
                 "FE",
                 "DEVELOPER",
                 "Interactive Web",
-                isTablet ? "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ChaHoRim" : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ChaHoRim",
+                isTablet
+                  ? "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ChaHoRim"
+                  : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ChaHoRim",
               ];
           return (
             <FitBigWords
@@ -139,13 +199,13 @@ export default function Hero() {
         })()}
         <ModelOverlay
           style={(() => {
-            const vw = typeof window !== 'undefined' ? window.innerWidth : 1024;
+            const vw = typeof window !== "undefined" ? window.innerWidth : 1024;
             // 모바일: 하단 중앙 고정 배치
             if (isMobile || !chaRect) {
               const size = Math.min(560, Math.max(220, vw * 1.05));
               return {
-                left: '50%',
-                transform: 'translateX(-50%)',
+                left: "50%",
+                transform: "translateX(-50%)",
                 bottom: 12,
                 width: size,
                 height: size,
@@ -155,63 +215,81 @@ export default function Hero() {
             // 테블릿에서 ChaHoRim의 높이가 상대적으로 커질 수 있으니 안전하게 보정
             const desktopSize = Math.min(
               isTablet ? 380 : 440,
-              Math.max(150, Math.round(chaRect.height * (isTablet ? 1.25 : 1.45)))
+              Math.max(
+                150,
+                Math.round(chaRect.height * (isTablet ? 1.25 : 1.45))
+              )
             );
             const gapLeft = isTablet ? 12 : 16;
             return {
-              left: Math.max(8, Math.round(chaRect.left - desktopSize - gapLeft)),
-              top: Math.round(chaRect.top + chaRect.height / 2 - desktopSize / 2),
-              transform: 'none',
-              bottom: 'auto',
+              left: Math.max(
+                8,
+                Math.round(chaRect.left - desktopSize - gapLeft)
+              ),
+              top: Math.round(
+                chaRect.top + chaRect.height / 2 - desktopSize / 2
+              ),
+              transform: "none",
+              bottom: "auto",
               width: desktopSize,
               height: desktopSize,
             };
           })()}
         >
-            <Canvas
-              orthographic
-              camera={{ position: [0, 1.2, 25], zoom: 90 }}
-              onWheel={(e) => {
-                // 기본 스크롤은 허용하고, 상위 리스너로의 전파만 차단
-                e.stopPropagation();
-              }}
-              style={{ touchAction: (isMobile || isTablet) ? 'pan-y pinch-zoom' : 'auto' }}
-            >
-              <ambientLight intensity={0.6} />
-              <MouseLight />
-              <directionalLight position={[3, 5, 3]} intensity={0.9} />
-              {isMobile ? (
-                gyroReady === false ? (
-                  <>
-                    <MouseParallax />
-                    <Center>
-                      <Appear3D initialScale={0.06}>
-                        <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={0.1} />
-                      </Appear3D>
-                    </Center>
-                  </>
-                ) : (
-                  <GyroGroup onReady={() => setGyroReady(true)} onUnsupported={() => setGyroReady(false)}>
-                    <Center>
-                      <Appear3D initialScale={0.06}>
-                        <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={0.1} />
-                      </Appear3D>
-                    </Center>
-                  </GyroGroup>
-                )
-              ) : (
+          <Canvas
+            orthographic
+            camera={{ position: [0, 1.2, 25], zoom: 90 }}
+            onWheel={(e) => {
+              // 기본 스크롤은 허용하고, 상위 리스너로의 전파만 차단
+              e.stopPropagation();
+            }}
+            style={{
+              touchAction: isMobile || isTablet ? "pan-y pinch-zoom" : "auto",
+            }}
+          >
+            <ambientLight intensity={0.6} />
+            <MouseLight />
+            <directionalLight position={[3, 5, 3]} intensity={0.9} />
+            {isMobile ? (
+              gyroReady === false ? (
                 <>
-                  <OrbitControls enableZoom={false} enablePan={false} enableDamping={false} enableRotate={false} />
+                  <MouseParallax />
                   <Center>
-                    <MouseOrient pageMouseRef={pageMouseRef}>
-                      <Appear3D initialScale={0.045}>
-                        <ResponsiveModel />
-                      </Appear3D>
-                    </MouseOrient>
+                    <Appear3D initialScale={0.06}>
+                      <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={0.1} />
+                    </Appear3D>
                   </Center>
                 </>
-              )}
-            </Canvas>
+              ) : (
+                <GyroGroup
+                  onReady={() => setGyroReady(true)}
+                  onUnsupported={() => setGyroReady(false)}
+                >
+                  <Center>
+                    <Appear3D initialScale={0.06}>
+                      <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={0.1} />
+                    </Appear3D>
+                  </Center>
+                </GyroGroup>
+              )
+            ) : (
+              <>
+                <OrbitControls
+                  enableZoom={false}
+                  enablePan={false}
+                  enableDamping={false}
+                  enableRotate={false}
+                />
+                <Center>
+                  <MouseOrient pageMouseRef={pageMouseRef}>
+                    <Appear3D initialScale={0.045}>
+                      <ResponsiveModel />
+                    </Appear3D>
+                  </MouseOrient>
+                </Center>
+              </>
+            )}
+          </Canvas>
         </ModelOverlay>
         {/* <InfoCard>
           <InfoTitle>
@@ -244,7 +322,12 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
   const rafRef = useRef(0);
   const lastWidthRef = useRef(0);
   const fittingRef = useRef(false);
-  const lastChaRectRef = useRef({ left: null, top: null, width: null, height: null });
+  const lastChaRectRef = useRef({
+    left: null,
+    top: null,
+    width: null,
+    height: null,
+  });
   const rainbowIdxRef = useRef(-1);
 
   useLayoutEffect(() => {
@@ -259,13 +342,15 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
       if (width !== lastWidthRef.current) {
         spansRef.current.forEach((span) => {
           if (!span) return;
-          const text = (span.textContent || '').replace(/\s+/g, '').toUpperCase();
+          const text = (span.textContent || "")
+            .replace(/\s+/g, "")
+            .toUpperCase();
           // FE는 두 글자라 scrollWidth 기반 피팅이 불안정할 수 있어 폭 비례 공식을 사용
-          if (text === 'FE') {
+          if (text === "FE") {
             const minFloor = width <= 380 ? 44 : 56;
             const k = 0.24; // 컨테이너 폭 대비 폰트 크기 비율
             const size = Math.max(minFloor, Math.floor(width * k));
-            span.style.fontSize = size + 'px';
+            span.style.fontSize = size + "px";
             return;
           }
           span.style.fontSize = base + "px";
@@ -279,12 +364,17 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
       }
 
       // vertical cap only on small screens to prevent double scroll
-      const isNarrow = typeof window !== 'undefined' ? window.innerWidth <= 860 : false;
+      const isNarrow =
+        typeof window !== "undefined" ? window.innerWidth <= 860 : false;
       if (isNarrow) {
         const GAP_PX = 24; // must match BigWords grid gap
         const LINE_HEIGHT = 0.8; // must match BigWords line-height
         const host = container.parentElement; // Container
-        const hostH = host ? host.clientHeight : (typeof window !== 'undefined' ? window.innerHeight : 900);
+        const hostH = host
+          ? host.clientHeight
+          : typeof window !== "undefined"
+          ? window.innerHeight
+          : 900;
         const verticalPadding = 40; // headroom to avoid touching bottom
         const capH = hostH - verticalPadding; // strict cap to avoid extra height on small screens
 
@@ -302,7 +392,7 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
           spansRef.current.forEach((span) => {
             if (!span) return;
             const size = parseFloat(span.style.fontSize) || 0;
-            span.style.fontSize = Math.floor(size * scale) + 'px';
+            span.style.fontSize = Math.floor(size * scale) + "px";
           });
         }
       }
@@ -310,16 +400,19 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
       // measure indices
       const idxInteractive = lines.findIndex((t) =>
         String(t)
-          .replace(/&nbsp;/g, '')
-          .replace(/\s+/g, '')
+          .replace(/&nbsp;/g, "")
+          .replace(/\s+/g, "")
           .toUpperCase()
-          .includes('INTERACTIVEWEB')
+          .includes("INTERACTIVEWEB")
       );
       rainbowIdxRef.current = idxInteractive;
 
       // measure ChaHoRim span rect and notify only on actual changes
       const idx = lines.findIndex((t) =>
-        String(t).replace(/&nbsp;/g, '').toUpperCase().includes('CHAHORIM')
+        String(t)
+          .replace(/&nbsp;/g, "")
+          .toUpperCase()
+          .includes("CHAHORIM")
       );
       if (idx >= 0 && spansRef.current[idx]) {
         const spanEl = spansRef.current[idx];
@@ -366,10 +459,10 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
 
     // window resize fallback
     const on = () => scheduleFit();
-    window.addEventListener('resize', on);
+    window.addEventListener("resize", on);
 
     return () => {
-      window.removeEventListener('resize', on);
+      window.removeEventListener("resize", on);
       if (containerRORef.current && containerRef.current) {
         containerRORef.current.unobserve(containerRef.current);
       }
@@ -385,70 +478,75 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
     const span = spansRef.current[idx];
     if (!span) return;
     const p = Math.max(0, Math.min(1, rainbowProgress));
-    span.style.position = 'relative';
-    span.style.zIndex = '1';
-    span.style.color = '';
+    span.style.position = "relative";
+    span.style.zIndex = "1";
+    span.style.color = "";
 
-    let fill = span.querySelector(':scope > .__rainbow_fill');
+    let fill = span.querySelector(":scope > .__rainbow_fill");
     if (!fill) {
-      fill = document.createElement('div');
-      fill.className = '__rainbow_fill';
-      fill.style.position = 'absolute';
-      fill.style.left = '0';
-      fill.style.top = '50%';
-      fill.style.transform = 'translateY(-50%)';
-      fill.style.height = '110%';
-      fill.style.borderRadius = '0px';
-      fill.style.pointerEvents = 'none';
-      fill.style.background = 'linear-gradient(90deg, #ff0040, #ff8a00, #ffd400, #2bdc00, #00c2ff, #7a00ff)';
-      fill.style.opacity = '0.8';
-      fill.style.zIndex = '0';
+      fill = document.createElement("div");
+      fill.className = "__rainbow_fill";
+      fill.style.position = "absolute";
+      fill.style.left = "0";
+      fill.style.top = "50%";
+      fill.style.transform = "translateY(-50%)";
+      fill.style.height = "110%";
+      fill.style.borderRadius = "0px";
+      fill.style.pointerEvents = "none";
+      fill.style.background =
+        "linear-gradient(90deg, #ff0040, #ff8a00, #ffd400, #2bdc00, #00c2ff, #7a00ff)";
+      fill.style.opacity = "0.8";
+      fill.style.zIndex = "0";
+      fill.style.width = "100%";
+      fill.style.transformOrigin = "left center";
+      fill.style.willChange = "transform";
       span.appendChild(fill);
     }
-    const spanW = span.offsetWidth || span.scrollWidth || 0;
     const spanH = span.offsetHeight || 0;
-    fill.style.height = Math.max(8, Math.round(spanH * 1.1)) + 'px';
-    fill.style.width = Math.round(spanW * p) + 'px';
+    fill.style.height = Math.max(8, Math.round(spanH * 1.1)) + "px";
+    fill.style.transform = `translateY(-50%) scaleX(${p})`;
 
-    let white = span.querySelector(':scope > .__white_text');
+    let white = span.querySelector(":scope > .__white_text");
     if (!white) {
-      white = document.createElement('span');
-      white.className = '__white_text';
+      white = document.createElement("span");
+      white.className = "__white_text";
       white.textContent = span.textContent;
-      white.style.position = 'absolute';
-      white.style.left = '0';
-      white.style.top = '0';
-      white.style.whiteSpace = 'inherit';
-      white.style.letterSpacing = 'inherit';
-      white.style.lineHeight = 'inherit';
-      white.style.font = 'inherit';
-      white.style.pointerEvents = 'none';
-      white.style.color = '#fff';
-      white.style.overflow = 'hidden';
-      white.style.zIndex = '2';
+      white.style.position = "absolute";
+      white.style.left = "0";
+      white.style.top = "0";
+      white.style.whiteSpace = "inherit";
+      white.style.letterSpacing = "inherit";
+      white.style.lineHeight = "inherit";
+      white.style.font = "inherit";
+      white.style.pointerEvents = "none";
+      white.style.color = "#fff";
+      white.style.overflow = "hidden";
+      white.style.zIndex = "2";
+      white.style.willChange = "clip-path";
       span.appendChild(white);
     }
-    white.style.width = Math.round(spanW * p) + 'px';
+    const rightClip = Math.max(0, Math.min(100, (1 - p) * 100));
+    white.style.clipPath = `inset(0 ${rightClip}% 0 0)`;
   }, [rainbowProgress]);
 
   const isStrong = (text) => {
     const normalized = String(text)
-      .replace(/&nbsp;/g, '')
-      .replace(/\s+/g, '')
+      .replace(/&nbsp;/g, "")
+      .replace(/\s+/g, "")
       .toUpperCase();
-    return normalized === 'DEVELOPER' || normalized === 'CHAHORIM';
+    return normalized === "DEVELOPER" || normalized === "CHAHORIM";
   };
 
   return (
     <BigWords ref={containerRef}>
       {lines.map((t, i) => {
-        const display = String(t).replace(/&nbsp;/g, '\u00A0');
+        const display = String(t).replace(/&nbsp;/g, "\u00A0");
         return (
           <Line
             key={i}
-            className={isStrong(t) ? 'strong' : ''}
+            className={isStrong(t) ? "strong" : ""}
             ref={(el) => (spansRef.current[i] = el)}
-            style={{ '--delay': `${i * 120}ms` }}
+            style={{ "--delay": `${i * 120}ms` }}
           >
             {display}
           </Line>
@@ -465,10 +563,10 @@ const Section = styled.section`
   --contentW: calc(100% - var(--sidebar) - (var(--hpad) * 2));
 
   padding-left: var(--sidebar);
-  min-height: 875px;
+  min-height: 1075px;
   background: #ffffff;
   overflow-x: hidden; /* prevent accidental horizontal scroll */
-  overflow-y: clip;   /* prevent absolute children from growing page height */
+  overflow-y: clip; /* prevent absolute children from growing page height */
   overscroll-behavior-y: contain; /* prevent scroll chaining */
 
   /* Tablet (861–1299): viewport height 기반으로 유동 */
@@ -484,7 +582,10 @@ const Section = styled.section`
   /* Mobile (≤1100): 상단 고정 헤더(72px)를 제외하고 꽉 차게 */
   @media (max-width: 1100px) {
     margin-top: 72px;
-    min-height: min(calc(100dvh - 72px), 820px); /* prevent excessive growth on ultra-tall */
+    min-height: min(
+      calc(100dvh - 72px),
+      820px
+    ); /* prevent excessive growth on ultra-tall */
     --sidebar: 0px;
     padding-left: 0;
   }
@@ -505,7 +606,8 @@ const BigWords = styled.div`
   inset: 0 auto auto 0; /* left:0; top:0 */
   width: var(--contentW);
   pointer-events: none;
-  font-family: "Pretendard-Medium", "Pretendard-Regular", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  font-family: "Pretendard-Medium", "Pretendard-Regular", system-ui,
+    -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   font-weight: 500; /* 실제 포함된 가중치로 고정 */
   font-synthesis: none; /* 브라우저의 가짜 Bold 생성 방지 */
   -webkit-font-smoothing: antialiased;
@@ -518,9 +620,17 @@ const BigWords = styled.div`
   word-break: break-word;
   white-space: normal;
 
-  span { display: block; white-space: nowrap; color: rgba(0,0,0,0.2); font-weight: inherit; }
-  span.strong { color: #000000; font-weight: inherit; }
-  
+  span {
+    display: block;
+    white-space: nowrap;
+    color: rgba(0, 0, 0, 0.2);
+    font-weight: inherit;
+  }
+  span.strong {
+    color: #000000;
+    font-weight: inherit;
+  }
+
   @media (max-width: 1299px) and (min-width: 861px) {
     width: min(92vw, var(--contentW));
     gap: 18px;
@@ -541,7 +651,7 @@ const slideIn = keyframes`
 const Line = styled.span`
   animation-name: ${slideIn};
   animation-duration: 600ms;
-  animation-timing-function: cubic-bezier(.2,.7,.2,1);
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
   animation-fill-mode: both;
   animation-delay: var(--delay, 0ms);
 `;
@@ -585,7 +695,7 @@ const InfoText = styled.p`
   color: #2f343a;
   font-size: clamp(13px, 1.8vw, 14px);
   line-height: 1.6;
-  -webkit-text-stroke: 0.25px rgba(255,255,255,0.35);
+  -webkit-text-stroke: 0.25px rgba(255, 255, 255, 0.35);
   text-shadow: 0 1px 1px rgb(255, 255, 255);
 `;
 
@@ -604,7 +714,7 @@ const Center3D = styled.div`
   height: clamp(380px, 55vh, 560px);
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
 `;
 
 const RightRail = styled.div``;
@@ -614,9 +724,12 @@ const ModelOverlay = styled.div`
   z-index: 2;
   /* 모바일/태블릿에서는 섹션 스크롤을 우선 허용하기 위해 부모는 기본적으로 스크롤 통과 */
   pointer-events: none;
-  transition: top 0.15s ease, left 0.15s ease, width 0.15s ease, height 0.15s ease;
+  transition: top 0.15s ease, left 0.15s ease, width 0.15s ease,
+    height 0.15s ease;
   /* 캔버스는 상호작용 허용. 터치 스크롤이 끊기지 않도록 기본 제스처 허용 */
-  canvas { pointer-events: auto; }
+  canvas {
+    pointer-events: auto;
+  }
 `;
 
 const ModelWrap = styled.div`
@@ -687,10 +800,26 @@ function MouseOrient({ pageMouseRef, children }) {
     if (!ref.current) return;
     const mx = pageMouseRef?.current?.x ?? 0;
     const my = pageMouseRef?.current?.y ?? 0;
-    const targetX = THREE.MathUtils.clamp(my * Math.PI * 0.15, -Math.PI * 0.25, Math.PI * 0.25);
-    const targetY = THREE.MathUtils.clamp(mx * Math.PI * 0.25, -Math.PI * 0.4, Math.PI * 0.4);
-    ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, targetX, 0.08);
-    ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, targetY, 0.08);
+    const targetX = THREE.MathUtils.clamp(
+      my * Math.PI * 0.15,
+      -Math.PI * 0.25,
+      Math.PI * 0.25
+    );
+    const targetY = THREE.MathUtils.clamp(
+      mx * Math.PI * 0.25,
+      -Math.PI * 0.4,
+      Math.PI * 0.4
+    );
+    ref.current.rotation.x = THREE.MathUtils.lerp(
+      ref.current.rotation.x,
+      targetX,
+      0.08
+    );
+    ref.current.rotation.y = THREE.MathUtils.lerp(
+      ref.current.rotation.y,
+      targetY,
+      0.08
+    );
   });
   return <group ref={ref}>{children}</group>;
 }
@@ -735,7 +864,8 @@ function Typewriter({ text, speed = 30, startDelay = 0 }) {
         });
       }, tickMs);
     };
-    if (startDelay > 0) timerId = window.setTimeout(start, startDelay); else start();
+    if (startDelay > 0) timerId = window.setTimeout(start, startDelay);
+    else start();
     return () => {
       if (timerId) window.clearTimeout(timerId);
       if (loopId) window.clearInterval(loopId);
@@ -756,7 +886,6 @@ function ResponsiveModel() {
   const s = minS + t * (maxS - minS);
   return <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={s} />;
 }
-
 
 // Gyro-controlled group: applies device orientation to group rotation
 function GyroGroup({ children, onReady, onUnsupported }) {
@@ -780,22 +909,38 @@ function GyroGroup({ children, onReady, onUnsupported }) {
       const beta = (rawBeta - base.current.beta) * (Math.PI / 180);
       const gamma = (rawGamma - base.current.gamma) * (Math.PI / 180);
       // 감도 증가: 배수 1.0, 각도 제한 ±60°
-      const targetX = THREE.MathUtils.clamp(beta * 1.0, -Math.PI / 3, Math.PI / 3);
-      const targetY = THREE.MathUtils.clamp(gamma * 1.0, -Math.PI / 3, Math.PI / 3);
+      const targetX = THREE.MathUtils.clamp(
+        beta * 1.0,
+        -Math.PI / 3,
+        Math.PI / 3
+      );
+      const targetY = THREE.MathUtils.clamp(
+        gamma * 1.0,
+        -Math.PI / 3,
+        Math.PI / 3
+      );
       if (ref.current) {
-        ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, targetX, 0.25);
-        ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, targetY, 0.25);
+        ref.current.rotation.x = THREE.MathUtils.lerp(
+          ref.current.rotation.x,
+          targetX,
+          0.25
+        );
+        ref.current.rotation.y = THREE.MathUtils.lerp(
+          ref.current.rotation.y,
+          targetY,
+          0.25
+        );
       }
     };
 
     // 권한 요청은 외부에서 처리. 여기선 리스너만 붙여본다.
     let attached = false;
-    if (typeof window !== 'undefined' && 'DeviceOrientationEvent' in window) {
-      window.addEventListener('deviceorientation', handle, true);
+    if (typeof window !== "undefined" && "DeviceOrientationEvent" in window) {
+      window.addEventListener("deviceorientation", handle, true);
       attached = true;
     }
-    if (!attached && 'ondeviceorientationabsolute' in window) {
-      window.addEventListener('deviceorientationabsolute', handle, true);
+    if (!attached && "ondeviceorientationabsolute" in window) {
+      window.addEventListener("deviceorientationabsolute", handle, true);
       attached = true;
     }
     if (attached) {
@@ -828,8 +973,8 @@ function GyroGroup({ children, onReady, onUnsupported }) {
     // raf = requestAnimationFrame(loop);
 
     return () => {
-      window.removeEventListener('deviceorientation', handle, true);
-      window.removeEventListener('deviceorientationabsolute', handle, true);
+      window.removeEventListener("deviceorientation", handle, true);
+      window.removeEventListener("deviceorientationabsolute", handle, true);
       // clearInterval(interval);
       // cancelAnimationFrame(raf);
     };
@@ -849,7 +994,7 @@ const PermButton = styled.button`
   border: none;
   border-radius: 12px;
   font-size: 14px;
-  @media (min-width: 861px) { display: none; }
+  @media (min-width: 861px) {
+    display: none;
+  }
 `;
-
-

@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export default function Contact() {
   return (
-    <Section>
+    <Section id="contact" tabIndex={-1}>
       <Grid>
         <Left>
           <Kicker>Contact</Kicker>
@@ -39,6 +39,7 @@ const Section = styled.section`
   background: #f8f8f8;
   padding-top: 80px;
   padding-bottom: 140px;
+  scroll-margin-top: 84px;
 
   @media (max-width: 1100px) {
     padding-left: 0;
@@ -92,7 +93,8 @@ const Form = styled.form`
     color: #222;
     font-size: 14px;
   }
-  input, textarea {
+  input,
+  textarea {
     width: 100%;
     padding: 12px 14px;
     border-radius: 12px;
@@ -100,7 +102,9 @@ const Form = styled.form`
     outline: none;
     font-size: 14px;
   }
-  textarea { resize: vertical; }
+  textarea {
+    resize: vertical;
+  }
 `;
 
 const Button = styled.button`
@@ -112,5 +116,3 @@ const Button = styled.button`
   padding: 12px 16px;
   cursor: pointer;
 `;
-
-
