@@ -91,7 +91,7 @@ export default function Hero() {
                 // 기본 스크롤은 허용하고, 상위 리스너로의 전파만 차단
                 e.stopPropagation();
               }}
-              style={{ touchAction: 'none' }}
+              style={{ touchAction: (isMobile || isTablet) ? 'pan-y pinch-zoom' : 'auto' }}
             >
               <ambientLight intensity={0.6} />
               <MouseLight />
@@ -403,8 +403,10 @@ const RightRail = styled.div``;
 const ModelOverlay = styled.div`
   position: absolute;
   z-index: 2;
-  pointer-events: none; /* avoid blocking page scroll */
+  /* 모바일/태블릿에서는 섹션 스크롤을 우선 허용하기 위해 부모는 기본적으로 스크롤 통과 */
+  pointer-events: none;
   transition: top 0.15s ease, left 0.15s ease, width 0.15s ease, height 0.15s ease;
+  /* 캔버스는 상호작용 허용. 터치 스크롤이 끊기지 않도록 기본 제스처 허용 */
   canvas { pointer-events: auto; }
 `;
 
