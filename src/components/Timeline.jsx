@@ -34,7 +34,7 @@ export default function Timeline() {
     {
       date: "2024",
       title: "TAPIE 부장 활동",
-      desc: "웹앱 전공 동아리 TAPIE의 1기 부장으로서 예산 관리, 행사 기획, 홍보 활동 등을 총괄하며 42명의 부원과 함께 활동함.",
+      desc: "웹앱 전공 동아리 TAPIE의 1기 부장으로서 예산 관리, 행사 기획, 홍보 활동 등을 하며 42명의 부원과 함께 활동함.",
     },
     {
       date: "2024",
