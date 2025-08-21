@@ -76,7 +76,7 @@ export default function Hero() {
               orthographic
               camera={{ position: [0, 1.2, 25], zoom: 90 }}
               onWheel={(e) => {
-                e.preventDefault();
+                // 기본 스크롤은 허용하고, 상위 리스너로의 전파만 차단
                 e.stopPropagation();
               }}
               style={{ touchAction: 'none' }}
@@ -158,6 +158,32 @@ function FitBigWords({ lines, onMeasureCha }) {
           span.style.fontSize = size + "px";
         });
         lastWidthRef.current = width;
+      }
+
+      // vertical cap to avoid layout thrash and scrollbar toggling
+      const GAP_PX = 24; // must match BigWords grid gap
+      const LINE_HEIGHT = 0.8; // must match BigWords line-height
+      const host = container.parentElement; // Container
+      const hostH = host ? host.clientHeight : (typeof window !== 'undefined' ? window.innerHeight : 900);
+      const verticalPadding = 40; // headroom to avoid touching bottom
+      const capH = Math.max(800, hostH) - verticalPadding; // stable cap near Section min-height
+
+      let totalHeight = 0;
+      let lineCount = 0;
+      spansRef.current.forEach((span) => {
+        if (!span) return;
+        const size = parseFloat(span.style.fontSize) || 0;
+        totalHeight += size * LINE_HEIGHT;
+        lineCount += 1;
+      });
+      totalHeight += GAP_PX * Math.max(0, lineCount - 1);
+      if (totalHeight > 0 && capH > 0 && totalHeight > capH) {
+        const scale = Math.max(0.5, Math.min(1, capH / totalHeight));
+        spansRef.current.forEach((span) => {
+          if (!span) return;
+          const size = parseFloat(span.style.fontSize) || 0;
+          span.style.fontSize = Math.floor(size * scale) + 'px';
+        });
       }
 
       // measure ChaHoRim span rect and notify only on actual changes
@@ -257,6 +283,7 @@ const Section = styled.section`
   min-height: 875px;
   background: #ffffff;
   overflow-x: hidden; /* prevent accidental horizontal scroll */
+  overflow-y: clip;   /* prevent absolute children from growing page height */
   overscroll-behavior-y: contain; /* prevent scroll chaining */
 
   @media (max-width: 860px) {
