@@ -68,11 +68,9 @@ export default function Timeline() {
 
   return (
     <Section id="timeline" tabIndex={-1} ref={sectionRef}>
-      <Grid>
-        <Left>
-          <Kicker data-visible={visible ? "1" : "0"}>Timeline</Kicker>
-        </Left>
-        <Right>
+      <Container>
+        <Kicker data-visible={visible ? "1" : "0"}>Timeline</Kicker>
+        <TimelineWrap>
           <Line aria-hidden="true" $visible={visible} />
           <List>
             {items.map((it, i) => (
@@ -95,8 +93,8 @@ export default function Timeline() {
               </Item>
             ))}
           </List>
-        </Right>
-      </Grid>
+        </TimelineWrap>
+      </Container>
     </Section>
   );
 }
@@ -105,7 +103,7 @@ const Section = styled.section`
   padding-left: 220px;
   background: #ffffff;
   padding-top: 80px;
-  padding-bottom: 140px;
+  padding-bottom: 200px;
   scroll-margin-top: 84px;
 
   @media (max-width: 1100px) {
@@ -114,23 +112,15 @@ const Section = styled.section`
   }
 `;
 
-const Grid = styled.div`
-  max-width: 1200px;
+const Container = styled.div`
+  max-width: 760px;
   margin: 0 auto;
   padding: 0 24px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-
-  @media (max-width: 860px) {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
 `;
 
-const Left = styled.div``;
-const Right = styled.div`
+const TimelineWrap = styled.div`
   position: relative;
+  margin-top: 16px;
 `;
 
 const Kicker = styled.h3`
@@ -155,7 +145,7 @@ const Line = styled.div`
   background: #e0e2e6;
   transform-origin: top;
   transform: scaleY(${({ $visible }) => ($visible ? 1 : 0)});
-  transition: transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: transform 500ms cubic-bezier(0.2, 0.7, 0.2, 1);
 `;
 
 const List = styled.ul`

@@ -29,7 +29,7 @@ const Section = styled.section`
   padding-left: 220px;
   background: #ffffff;
   padding-top: 80px;
-  padding-bottom: 140px;
+  padding-bottom: 200px;
   scroll-margin-top: 84px;
 
   @media (max-width: 1100px) {

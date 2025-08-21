@@ -71,7 +71,7 @@ const Section = styled.section`
   padding-left: 220px;
   background: #ffffff;
   padding-top: 80px;
-  padding-bottom: 160px;
+  padding-bottom: 220px;
   scroll-margin-top: 84px;
 
   @media (max-width: 860px) {
