@@ -17,13 +17,20 @@ function Box() {
 export default function Hero() {
   const [chaRect, setChaRect] = useState(null);
   const [isMobile, setIsMobile] = useState(
-    typeof window !== 'undefined' ? window.innerWidth <= 860 : false
+    typeof window !== 'undefined' ? window.innerWidth <= 1100 : false
+  );
+  const [isTablet, setIsTablet] = useState(
+    typeof window !== 'undefined' ? (window.innerWidth >= 861 && window.innerWidth <= 1299) : false
   );
   const [gyroReady, setGyroReady] = useState(null); // null: unknown, true: active, false: fallback
   const [needsPerm, setNeedsPerm] = useState(false);
 
   useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth <= 860);
+    const handler = () => {
+      const w = window.innerWidth;
+      setIsMobile(w <= 1100);
+      setIsTablet(w >= 861 && w <= 1299);
+    };
     window.addEventListener('resize', handler);
     return () => window.removeEventListener('resize', handler);
   }, []);
@@ -37,7 +44,7 @@ export default function Hero() {
                 "FE",
                 "DEVELOPER",
                 "Interactive Web",
-                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ChaHoRim",
+                isTablet ? "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ChaHoRim" : "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ChaHoRim",
               ];
           return (
             <FitBigWords
@@ -60,10 +67,15 @@ export default function Hero() {
                 height: size,
               };
             }
-            // 데스크톱: ChaHoRim의 왼쪽 중앙에 배치, 크기는 글자 높이에 비례
-            const desktopSize = Math.min(420, Math.max(160, Math.round(chaRect.height * 1.4)));
+            // 데스크톱/태블릿: ChaHoRim의 왼쪽 중앙에 배치, 크기는 글자 높이에 비례
+            // 테블릿에서 ChaHoRim의 높이가 상대적으로 커질 수 있으니 안전하게 보정
+            const desktopSize = Math.min(
+              isTablet ? 380 : 440,
+              Math.max(150, Math.round(chaRect.height * (isTablet ? 1.25 : 1.45)))
+            );
+            const gapLeft = isTablet ? 12 : 16;
             return {
-              left: Math.max(8, Math.round(chaRect.left - desktopSize - 16)),
+              left: Math.max(8, Math.round(chaRect.left - desktopSize - gapLeft)),
               top: Math.round(chaRect.top + chaRect.height / 2 - desktopSize / 2),
               transform: 'none',
               bottom: 'auto',
@@ -286,7 +298,11 @@ const Section = styled.section`
   overflow-y: clip;   /* prevent absolute children from growing page height */
   overscroll-behavior-y: contain; /* prevent scroll chaining */
 
-  @media (max-width: 860px) {
+  @media (max-width: 1299px) and (min-width: 861px) {
+    min-height: 840px;
+  }
+
+  @media (max-width: 1100px) {
     margin-top: 100px;
     min-height: 800px;
     --sidebar: 0px;
@@ -320,6 +336,11 @@ const BigWords = styled.div`
 
   span { display: block; white-space: nowrap; color: rgba(0,0,0,0.2); }
   span.strong { color: #000000; }
+  
+  @media (max-width: 1299px) and (min-width: 861px) {
+    width: min(92vw, var(--contentW));
+    gap: 18px;
+  }
 `;
 
 const InfoCard = styled.div`
@@ -329,12 +350,17 @@ const InfoCard = styled.div`
   width: min(36ch, 40vw);
   max-width: 520px;
 
+  @media (max-width: 1299px) and (min-width: 861px) {
+    margin-left: clamp(24px, 10vw, 200px);
+    width: min(38ch, 48vw);
+  }
+
   @media (max-width: 1024px) {
     margin-left: clamp(16px, 6vw, 120px);
     width: min(42ch, 56vw);
   }
 
-  @media (max-width: 860px) {
+  @media (max-width: 1100px) {
     margin-left: 16px;
     width: 90%;
     max-width: none;
@@ -397,7 +423,7 @@ const ModelWrap = styled.div`
   margin-right: auto;
   overscroll-behavior: contain;
 
-  @media (max-width: 860px) {
+  @media (max-width: 1100px) {
     width: min(96vw, var(--contentW));
     --model-offset: 0px;
     margin-left: calc((100vw - var(--contentW)) / 2);
