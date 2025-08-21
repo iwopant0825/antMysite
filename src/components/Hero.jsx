@@ -166,7 +166,8 @@ function FitBigWords({ lines, onMeasureCha }) {
           span.style.fontSize = base + "px";
           const sw = span.scrollWidth || 1;
           const ratio = width / sw;
-          const size = Math.max(56, Math.floor(base * ratio)); // stabilize with floor rounding
+          const minFloor = width <= 380 ? 44 : 56; // very small screens need a lower floor
+          const size = Math.max(minFloor, Math.floor(base * ratio)); // stabilize with floor rounding
           span.style.fontSize = size + "px";
         });
         lastWidthRef.current = width;
@@ -302,6 +303,11 @@ const Section = styled.section`
     min-height: 840px;
   }
 
+  /* 모바일/소형 태블릿에서는 텍스트가 잘리지 않도록 섹션의 세로 오버플로우 허용 */
+  @media (max-width: 1100px) {
+    overflow-y: visible;
+  }
+
   @media (max-width: 1100px) {
     margin-top: 100px;
     min-height: 800px;
@@ -340,6 +346,12 @@ const BigWords = styled.div`
   @media (max-width: 1299px) and (min-width: 861px) {
     width: min(92vw, var(--contentW));
     gap: 18px;
+  }
+
+  /* 모바일/소형 태블릿에서는 좌우 여백을 더 확보해 잘림 방지 */
+  @media (max-width: 1100px) {
+    width: min(94vw, var(--contentW));
+    gap: 20px;
   }
 `;
 
