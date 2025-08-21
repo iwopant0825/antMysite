@@ -2,28 +2,28 @@
   font-family: "Pretendard-Light";
   font-weight: 300;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
   src: url("/font/Pretendard-Light.otf") format("opentype");
 }
 @font-face {
   font-family: "Pretendard-Regular";
   font-weight: 400;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
   src: url("/font/Pretendard-Regular.otf") format("opentype");
 }
 @font-face {
   font-family: "Pretendard-Medium";
   font-weight: 500;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
   src: url("/font/Pretendard-Medium.otf") format("opentype");
 }
 @font-face {
   font-family: "Pretendard-Thin";
   font-weight: 100;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
   src: url("/font/Pretendard-Thin.otf") format("opentype");
 }
 
