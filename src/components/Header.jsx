@@ -1,5 +1,6 @@
 import styled, { css } from "styled-components";
 import { useState } from "react";
+import LogoSvg from "/Logo.svg";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -7,11 +8,14 @@ export default function Header() {
   return (
     <>
       <Aside>
-        <Small>
-          FE Developer
-          <br />
-          smallants0825
-        </Small>
+        <SmallRow>
+          <Logo src={LogoSvg} alt="logo" />
+          <Small>
+            FE Developer
+            <br />
+            smallants0825
+          </Small>
+        </SmallRow>
         <Nav $open={open}>
           <NavLink onClick={close}>Profile</NavLink>
           <NavLink onClick={close}>Skills</NavLink>
@@ -65,6 +69,18 @@ const Small = styled.div`
   font-size: 12px;
   color: #6b6f76;
   line-height: 1.5;
+`;
+
+const SmallRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const Logo = styled.img`
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 `;
 
 const Nav = styled.nav`

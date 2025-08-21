@@ -29,6 +29,7 @@ export default function Hero() {
   const touchStartYRef = useRef(null);
   const sectionRef = useRef(null);
   const isCoarseRef = useRef(false);
+  const pageMouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const handler = () => {
@@ -52,6 +53,18 @@ export default function Hero() {
       if (mql.removeEventListener) mql.removeEventListener('change', set);
       else if (mql.removeListener) mql.removeListener(set);
     };
+  }, []);
+
+  // Track page-level mouse position (for desktop orientation even outside canvas)
+  useEffect(() => {
+    const onMove = (e) => {
+      const w = window.innerWidth || 1;
+      const h = window.innerHeight || 1;
+      pageMouseRef.current.x = (e.clientX / w) * 2 - 1;
+      pageMouseRef.current.y = (e.clientY / h) * 2 - 1;
+    };
+    window.addEventListener('mousemove', onMove, { passive: true });
+    return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
   // wheel/touch gating at top: fill/unfill rainbow before allowing scroll
@@ -182,10 +195,11 @@ export default function Hero() {
                 )
               ) : (
                 <>
-                  <OrbitControls enableZoom={false} enablePan={false} enableDamping={false} />
-                  <MouseParallax />
+                  <OrbitControls enableZoom={false} enablePan={false} enableDamping={false} enableRotate={false} />
                   <Center>
-                    <ResponsiveModel />
+                    <MouseOrient pageMouseRef={pageMouseRef}>
+                      <ResponsiveModel />
+                    </MouseOrient>
                   </Center>
                 </>
               )}
@@ -594,32 +608,41 @@ function MouseLight() {
   return <pointLight ref={ref} intensity={1.4} distance={80} decay={2} />;
 }
 
-function MouseParallax() {
+function MouseParallax({ pageMouseRef }) {
   const { viewport } = useThree();
-  useFrame(({ mouse, camera }) => {
-    if (!viewport || viewport.width <= 6) return; // 훅은 항상 호출, 조건은 내부 처리
-    camera.position.x = THREE.MathUtils.lerp(
-      camera.position.x,
-      mouse.x * 1,
-      0.03
-    );
-    camera.position.y = THREE.MathUtils.lerp(
-      camera.position.y,
-      mouse.y * 1,
-      0.01
-    );
+  useFrame(({ camera }) => {
+    if (!viewport || viewport.width <= 6) return;
+    const mx = pageMouseRef?.current?.x ?? 0;
+    const my = pageMouseRef?.current?.y ?? 0;
+    camera.position.x = THREE.MathUtils.lerp(camera.position.x, mx * 1, 0.03);
+    camera.position.y = THREE.MathUtils.lerp(camera.position.y, my * 1, 0.01);
     camera.position.z = THREE.MathUtils.lerp(
       camera.position.z,
-      Math.max(4, Math.abs(mouse.x * mouse.y * 4)),
+      Math.max(4, Math.abs(mx * my * 4)),
       0.01
     );
     camera.rotation.y = THREE.MathUtils.lerp(
       camera.rotation.y,
-      mouse.x * -Math.PI * 0.025,
+      mx * -Math.PI * 0.025,
       0.001
     );
   });
   return null;
+}
+
+// Rotate a group by page-level mouse movement (desktop only)
+function MouseOrient({ pageMouseRef, children }) {
+  const ref = useRef();
+  useFrame(() => {
+    if (!ref.current) return;
+    const mx = pageMouseRef?.current?.x ?? 0;
+    const my = pageMouseRef?.current?.y ?? 0;
+    const targetX = THREE.MathUtils.clamp(my * Math.PI * 0.15, -Math.PI * 0.25, Math.PI * 0.25);
+    const targetY = THREE.MathUtils.clamp(mx * Math.PI * 0.25, -Math.PI * 0.4, Math.PI * 0.4);
+    ref.current.rotation.x = THREE.MathUtils.lerp(ref.current.rotation.x, targetX, 0.08);
+    ref.current.rotation.y = THREE.MathUtils.lerp(ref.current.rotation.y, targetY, 0.08);
+  });
+  return <group ref={ref}>{children}</group>;
 }
 
 function ResponsiveModel() {
