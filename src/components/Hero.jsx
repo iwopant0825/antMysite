@@ -466,7 +466,7 @@ const Section = styled.section`
 
   @media (max-width: 1100px) {
     margin-top: 100px;
-    min-height: 700px;
+    min-height: 800px;
     --sidebar: 0px;
     padding-left: 0;
   }
