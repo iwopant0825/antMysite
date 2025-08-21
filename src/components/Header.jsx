@@ -43,8 +43,9 @@ const Aside = styled.aside`
   background: transparent;
   z-index: 60;
   border-right: 1px solid #e0e0e0;
+  background: rgba(255, 255, 255, 0.9);
 
-  @media (max-width: 860px) {
+  @media (max-width: 1100px) {
     inset: 0 0 auto 0;
     width: 100%;
     height: 72px;
@@ -72,7 +73,7 @@ const Nav = styled.nav`
   gap: 14px;
   margin-top: 40px;
 
-  @media (max-width: 860px) {
+  @media (max-width: 1100px) {
     flex-direction: row;
     margin-top: 0;
     gap: 22px;
@@ -100,7 +101,7 @@ const NavLink = styled.button`
   cursor: pointer;
   font-size: 14px;
 
-  @media (max-width: 860px) {
+  @media (max-width: 1100px) {
     text-align: center;
   }
 `;
@@ -118,7 +119,7 @@ const Year = styled.div`
 
 const MenuBtn = styled.button`
   display: none;
-  @media (max-width: 860px) {
+  @media (max-width: 1100px) {
     display: inline-flex;
     width: 40px;
     height: 40px;
@@ -151,7 +152,7 @@ const Bar = styled.span`
 
 const Backdrop = styled.div`
   display: none;
-  @media (max-width: 860px) {
+  @media (max-width: 1100px) {
     display: block;
     position: fixed;
     z-index: 55;
