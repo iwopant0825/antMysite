@@ -37,7 +37,7 @@ export default function Hero() {
                 "FE",
                 "DEVELOPER",
                 "Interactive Web",
-                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ChaHoRim",
+                "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ChaHoRim",
               ];
           return (
             <FitBigWords
@@ -49,15 +49,26 @@ export default function Hero() {
         <ModelOverlay
           style={(() => {
             const vw = typeof window !== 'undefined' ? window.innerWidth : 1024;
-            const size = isMobile
-              ? Math.min(560, Math.max(220, vw * 1.05))
-              : Math.min(520, Math.max(260, vw * 0.28));
+            // 모바일: 하단 중앙 고정 배치
+            if (isMobile || !chaRect) {
+              const size = Math.min(560, Math.max(220, vw * 1.05));
+              return {
+                left: '50%',
+                transform: 'translateX(-50%)',
+                bottom: 0,
+                width: size,
+                height: size,
+              };
+            }
+            // 데스크톱: ChaHoRim의 왼쪽 중앙에 배치, 크기는 글자 높이에 비례
+            const desktopSize = Math.min(420, Math.max(160, Math.round(chaRect.height * 1.4)));
             return {
-              left: '50%',
-              transform: 'translateX(-50%)',
-              bottom: 0,
-              width: size,
-              height: size,
+              left: Math.max(8, Math.round(chaRect.left - desktopSize - 16)),
+              top: Math.round(chaRect.top + chaRect.height / 2 - desktopSize / 2),
+              transform: 'none',
+              bottom: 'auto',
+              width: desktopSize,
+              height: desktopSize,
             };
           })()}
         >
@@ -78,12 +89,14 @@ export default function Hero() {
                   <>
                     <MouseParallax />
                     <Center>
-                      <ResponsiveModel />
+                      <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={0.1} />
                     </Center>
                   </>
                 ) : (
                   <GyroGroup onReady={() => setGyroReady(true)} onUnsupported={() => setGyroReady(false)}>
-                    <ResponsiveModel />
+                    <Center>
+                      <LogoModel rotation={[0, -Math.PI / 2, 0]} scale={0.1} />
+                    </Center>
                   </GyroGroup>
                 )
               ) : (
@@ -411,13 +424,11 @@ function MouseParallax() {
 
 function ResponsiveModel() {
   const { size } = useThree();
-  // Map overlay canvas width to a smaller model scale range
-  // Overlay width (current): 120px → 420px
-  // Scale mapping reduced: 0.045 → 0.10 (smaller overall)
-  const minW = 120;
+  // Overlay width (desktop): 160px → 420px 에서 스케일 0.05 → 0.11로 맵핑
+  const minW = 160;
   const maxW = 420;
-  const minS = 0.045;
-  const maxS = 0.10;
+  const minS = 0.05;
+  const maxS = 0.11;
   const w = Math.max(minW, Math.min(maxW, size.width));
   const t = (w - minW) / (maxW - minW);
   const s = minS + t * (maxS - minS);
