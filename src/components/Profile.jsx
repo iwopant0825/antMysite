@@ -6,6 +6,9 @@ export default function Profile() {
     <Section id="profile" tabIndex={-1}>
       <Grid>
         <RightCopy>
+          <StampRow>
+            <Stamp>Profile</Stamp>
+          </StampRow>
           <Kicker>개발자 차호림</Kicker>
           <Paragraph>
             저는 사용자 경험을 최우선으로 생각하는 프론트엔드 개발자입니다.
@@ -16,17 +19,7 @@ export default function Profile() {
             시도를 통해 더 나은 웹을 만들어가는 개발자가 되고자 합니다.
           </Paragraph>
 
-          <StampRow>
-            <Stamp>Profile</Stamp>
-          </StampRow>
-
-          <BigTitle>
-            Join our
-            <br />
-            community of
-            <br />
-            creatives
-          </BigTitle>
+          {/* WordsStack moved into Immersion section */}
         </RightCopy>
       </Grid>
     </Section>
@@ -96,3 +89,5 @@ const BigTitle = styled.h2`
   font-size: clamp(48px, 8vw, 120px);
   line-height: 0.9;
 `;
+
+/* WordsStack styles moved to Immersion section */
