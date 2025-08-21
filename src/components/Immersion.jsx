@@ -14,6 +14,20 @@ export default function Immersion() {
   const wheelAccumRef = useRef(0);
   const touchAccumRef = useRef(0);
 
+  // 반응형 디바이스 판별
+  const [device, setDevice] = useState("desktop"); // 'mobile' | 'tablet' | 'desktop'
+  useEffect(() => {
+    const detect = () => {
+      const w = window.innerWidth || 1200;
+      if (w <= 700) setDevice("mobile");
+      else if (w <= 1100) setDevice("tablet");
+      else setDevice("desktop");
+    };
+    detect();
+    window.addEventListener("resize", detect);
+    return () => window.removeEventListener("resize", detect);
+  }, []);
+
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -48,7 +62,10 @@ export default function Immersion() {
       const topVisible = Math.min(rect.bottom, vh) - Math.max(rect.top, header);
       const visible = Math.max(0, topVisible);
       const ratio = visible / Math.min(usable, rect.height || usable);
-      return ratio >= 0.98; // 98% 이상 보이면 허용 (더 아래로 스크롤 후 시작)
+      // 모바일은 약간 완화, 데스크톱은 엄격
+      const need =
+        device === "mobile" ? 0.92 : device === "tablet" ? 0.95 : 0.98;
+      return ratio >= need;
     };
 
     const shouldHandle = () => {
@@ -62,7 +79,9 @@ export default function Immersion() {
       return false;
     };
 
-    const TRIGGER = 160; // 스냅 임계값 상향
+    // 디바이스별 스냅 임계값
+    const TRIGGER = device === "mobile" ? 200 : device === "tablet" ? 180 : 160;
+    const CLAIM = device === "mobile" ? 28 : 12; // 제스처 선점 임계값
 
     const snapTo = (dir) => {
       if (dir > 0) targetRef.current = 1; // 정면
@@ -97,17 +116,29 @@ export default function Immersion() {
       touchAccumRef.current = 0;
     };
     const onTouchMove = (e) => {
-      if (!shouldHandle() || touchStartY == null) return;
+      // 터치는 shouldHandle 대신 가시성으로만 게이트 → 기본 스크롤 방해 최소화
+      if (!isVisibleEnough() || touchStartY == null) return;
       const y = e.touches?.[0]?.clientY ?? touchStartY;
       const dy = touchStartY - y;
       const atStart =
         currentProgressRef.current <= 0.001 && targetRef.current <= 0.001;
       const atEnd =
         currentProgressRef.current >= 0.999 && targetRef.current >= 0.999;
-      if ((atStart && dy < 0) || (atEnd && dy > 0)) return;
+      if ((atStart && dy < 0) || (atEnd && dy > 0)) return; // 반대방향→기본 스크롤
+
+      const nextAccum = touchAccumRef.current + dy;
+      // CLAIM 전까지는 항상 기본 스크롤 허용 (preventDefault 금지)
+      if (Math.abs(nextAccum) < CLAIM && atStart) {
+        touchAccumRef.current = nextAccum;
+        touchStartY = y;
+        return;
+      }
+
+      // 여기부터 인터랙션 선점
       if (e.cancelable) e.preventDefault();
       e.stopPropagation();
-      touchAccumRef.current += dy;
+      engagedRef.current = true; // 선점 시점에만 활성화
+      touchAccumRef.current = nextAccum;
       touchStartY = y;
       if (touchAccumRef.current >= TRIGGER) {
         touchAccumRef.current = 0;
@@ -146,7 +177,7 @@ export default function Immersion() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = 0;
     };
-  }, []);
+  }, [device]);
 
   return (
     <Section id="immersion" tabIndex={-1} ref={sectionRef}>
@@ -154,13 +185,19 @@ export default function Immersion() {
         <Title>Vision</Title>
       </TitleRow>
       <CanvasWrapper>
-        <Canvas orthographic camera={{ position: [0, 25, 0.001], zoom: 70 }}>
-          <CameraRig progress={progress} />
+        <Canvas
+          orthographic
+          camera={{ position: [0, 25, 0.001], zoom: 70 }}
+          style={{ touchAction: device === "desktop" ? "auto" : "pan-y" }}
+        >
+          <CameraRig progress={progress} device={device} />
           <color attach="background" args={["#ffffff"]} />
           <ambientLight intensity={0.6} />
           <directionalLight position={[5, 10, 5]} intensity={0.9} />
-          <GroundWords />
+          <GroundWords device={device} />
+          {/** 모바일/태블릿에서는 OrbitControls 자체를 비활성화하여 터치 기본 스크롤 방해 제거 */}
           <OrbitControls
+            enabled={device === "desktop"}
             enableRotate={false}
             enablePan={false}
             enableZoom={false}
@@ -171,13 +208,15 @@ export default function Immersion() {
   );
 }
 
-function CameraRig({ progress }) {
+function CameraRig({ progress, device }) {
   const { camera } = useThree();
   useFrame(() => {
     const t = THREE.MathUtils.clamp(progress, 0, 1);
     const ease = t * t * (3 - 2 * t);
-    const startPos = new THREE.Vector3(0, 25, 0.001);
-    const endPos = new THREE.Vector3(0, 6, 24);
+    const startY = device === "mobile" ? 20 : device === "tablet" ? 22 : 25;
+    const endY = device === "mobile" ? 4.5 : device === "tablet" ? 5.5 : 6;
+    const startPos = new THREE.Vector3(0, startY, 0.001);
+    const endPos = new THREE.Vector3(0, endY, 24);
     const pos = new THREE.Vector3().lerpVectors(startPos, endPos, ease);
     camera.position.copy(pos);
     const startRotX = -Math.PI / 2;
@@ -189,7 +228,7 @@ function CameraRig({ progress }) {
   return null;
 }
 
-function GroundWords() {
+function GroundWords({ device }) {
   const common = {
     font: "/font/Pretendard-Medium.otf",
     color: "#000",
@@ -200,18 +239,21 @@ function GroundWords() {
   };
   const { viewport, size } = useThree();
   const pxToWorld = viewport.width / size.width;
-  const groupX = -viewport.width * 0.25 + pxToWorld * 260;
+  let groupX = -viewport.width * 0.25 + pxToWorld * 260;
+  if (device === "tablet") groupX = -viewport.width * 0.12 + pxToWorld * 140;
+  if (device === "mobile") groupX = 0;
 
   const lines = [
     { en: "The Key", ko: "핵심은" },
     { en: "is", ko: "바로" },
     { en: "Immersion", ko: "몰입감" },
   ];
-  const enSize = 1.6;
-  const koSize = 0.5;
-  const gapX = 0.5;
+  const enSize = device === "mobile" ? 0.8 : device === "tablet" ? 1.2 : 1.6;
+  const koSize = device === "mobile" ? 0.28 : device === "tablet" ? 0.42 : 0.5;
+  const gapX = device === "mobile" ? 0.26 : device === "tablet" ? 0.42 : 0.5;
   const koFont = "/font/Pretendard-Thin.otf";
-  const lineGap = enSize * 1.4;
+  const lineGap =
+    enSize * (device === "mobile" ? 1.1 : device === "tablet" ? 1.25 : 1.4);
 
   const approxWidth = (t, size) => t.replace(/\s+/g, "").length * size * 0.62;
   const maxPairW = Math.max(
@@ -309,6 +351,12 @@ const TitleRow = styled.div`
   padding: 0 24px;
   position: relative;
   z-index: 1;
+  @media (max-width: 1100px) {
+    margin: 0 40px auto;
+  }
+  @media (max-width: 700px) {
+    margin: 0 16px auto;
+  }
 `;
 
 const Title = styled.h3`
