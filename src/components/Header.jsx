@@ -11,71 +11,27 @@ export default function Header() {
     e.preventDefault();
     const id = href.slice(1);
     const el = document.getElementById(id);
-    if (!el) {
-      close();
-      return;
-    }
-
-    // URL 해시 동기화 (기본 링크 동작은 막은 상태)
-    if (window.history && window.history.pushState) {
-      window.history.pushState(null, "", href);
-    } else {
-      window.location.hash = href;
-    }
-
-    // 목표 좌표 계산 (섹션의 scroll-margin-top 보정 반영)
-    const rect = el.getBoundingClientRect();
-    const current = window.scrollY || document.documentElement.scrollTop || 0;
-    let offset = 0;
-    try {
-      const smt = window.getComputedStyle(el).scrollMarginTop;
-      if (smt) offset = parseFloat(smt) || 0;
-    } catch (_) {}
-    const target = current + rect.top - offset;
-
-    // 접근성 설정 및 기능 지원 분기
-    const reduce =
-      typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const canNativeSmooth = "scrollBehavior" in document.documentElement.style;
-
-    const focusLater = () => {
-      try {
-        el.focus({ preventScroll: true });
-      } catch (_) {
-        try {
-          el.setAttribute("tabindex", "-1");
-          el.focus({ preventScroll: true });
-        } catch (_) {}
+    if (el) {
+      if (window.history && window.history.pushState) {
+        window.history.pushState(null, "", href);
+      } else {
+        window.location.hash = href;
       }
-    };
-
-    if (reduce) {
-      window.scrollTo(0, target);
-      focusLater();
-      close();
-      return;
-    }
-
-    if (canNativeSmooth) {
-      window.scrollTo({ top: target, behavior: "smooth" });
-      window.setTimeout(focusLater, 450);
-    } else {
-      // 스무스 스크롤 폴백 (RAF) — cubic ease-in-out
-      const duration = 550;
-      const start = performance.now();
-      const delta = target - current;
-      const ease = (t) =>
-        t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-      const step = (now) => {
-        const t = Math.min(1, (now - start) / duration);
-        const y = current + delta * ease(t);
-        window.scrollTo(0, Math.round(y));
-        if (t < 1) requestAnimationFrame(step);
-        else focusLater();
-      };
-      requestAnimationFrame(step);
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "nearest",
+      });
+      window.setTimeout(() => {
+        try {
+          el.focus({ preventScroll: true });
+        } catch (_) {
+          try {
+            el.setAttribute("tabindex", "-1");
+            el.focus({ preventScroll: true });
+          } catch (_) {}
+        }
+      }, 300);
     }
     close();
   };

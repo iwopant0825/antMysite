@@ -110,10 +110,8 @@ export default function Hero() {
     ensureRainbowAnimating();
   };
 
-  // Add non-passive native listeners to allow preventDefault without warnings
+  // Add non-passive global listeners in capture phase to intercept scroll even over the sidebar
   useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
     const handleWheel = (e) => {
       const atTop =
         (typeof window !== "undefined"
@@ -157,22 +155,26 @@ export default function Hero() {
         applyDeltaToRainbow(dy * gain);
       }
     };
-    el.addEventListener("wheel", handleWheel, {
+    window.addEventListener("wheel", handleWheel, {
       passive: false,
       capture: true,
     });
-    el.addEventListener("touchstart", handleTouchStart, {
+    window.addEventListener("touchstart", handleTouchStart, {
       passive: true,
       capture: true,
     });
-    el.addEventListener("touchmove", handleTouchMove, {
+    window.addEventListener("touchmove", handleTouchMove, {
       passive: false,
       capture: true,
     });
     return () => {
-      el.removeEventListener("wheel", handleWheel, { capture: true });
-      el.removeEventListener("touchstart", handleTouchStart, { capture: true });
-      el.removeEventListener("touchmove", handleTouchMove, { capture: true });
+      window.removeEventListener("wheel", handleWheel, { capture: true });
+      window.removeEventListener("touchstart", handleTouchStart, {
+        capture: true,
+      });
+      window.removeEventListener("touchmove", handleTouchMove, {
+        capture: true,
+      });
     };
   }, []);
   return (
