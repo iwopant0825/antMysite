@@ -255,40 +255,52 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
       if (width !== lastWidthRef.current) {
         spansRef.current.forEach((span) => {
           if (!span) return;
+          const text = (span.textContent || '').replace(/\s+/g, '').toUpperCase();
+          // FE는 두 글자라 scrollWidth 기반 피팅이 불안정할 수 있어 폭 비례 공식을 사용
+          if (text === 'FE') {
+            const minFloor = width <= 380 ? 44 : 56;
+            const k = 0.24; // 컨테이너 폭 대비 폰트 크기 비율
+            const size = Math.max(minFloor, Math.floor(width * k));
+            span.style.fontSize = size + 'px';
+            return;
+          }
           span.style.fontSize = base + "px";
           const sw = span.scrollWidth || 1;
           const ratio = width / sw;
-          const minFloor = width <= 380 ? 44 : 56; // very small screens need a lower floor
-          const size = Math.max(minFloor, Math.floor(base * ratio)); // stabilize with floor rounding
+          const minFloor = width <= 380 ? 44 : 56;
+          const size = Math.max(minFloor, Math.floor(base * ratio));
           span.style.fontSize = size + "px";
         });
         lastWidthRef.current = width;
       }
 
-      // vertical cap to avoid layout thrash and scrollbar toggling
-      const GAP_PX = 24; // must match BigWords grid gap
-      const LINE_HEIGHT = 0.8; // must match BigWords line-height
-      const host = container.parentElement; // Container
-      const hostH = host ? host.clientHeight : (typeof window !== 'undefined' ? window.innerHeight : 900);
-      const verticalPadding = 40; // headroom to avoid touching bottom
-      const capH = Math.max(800, hostH) - verticalPadding; // stable cap near Section min-height
+      // vertical cap only on small screens to prevent double scroll
+      const isNarrow = typeof window !== 'undefined' ? window.innerWidth <= 860 : false;
+      if (isNarrow) {
+        const GAP_PX = 24; // must match BigWords grid gap
+        const LINE_HEIGHT = 0.8; // must match BigWords line-height
+        const host = container.parentElement; // Container
+        const hostH = host ? host.clientHeight : (typeof window !== 'undefined' ? window.innerHeight : 900);
+        const verticalPadding = 40; // headroom to avoid touching bottom
+        const capH = Math.max(800, hostH) - verticalPadding; // stable cap near Section min-height
 
-      let totalHeight = 0;
-      let lineCount = 0;
-      spansRef.current.forEach((span) => {
-        if (!span) return;
-        const size = parseFloat(span.style.fontSize) || 0;
-        totalHeight += size * LINE_HEIGHT;
-        lineCount += 1;
-      });
-      totalHeight += GAP_PX * Math.max(0, lineCount - 1);
-      if (totalHeight > 0 && capH > 0 && totalHeight > capH) {
-        const scale = Math.max(0.5, Math.min(1, capH / totalHeight));
+        let totalHeight = 0;
+        let lineCount = 0;
         spansRef.current.forEach((span) => {
           if (!span) return;
           const size = parseFloat(span.style.fontSize) || 0;
-          span.style.fontSize = Math.floor(size * scale) + 'px';
+          totalHeight += size * LINE_HEIGHT;
+          lineCount += 1;
         });
+        totalHeight += GAP_PX * Math.max(0, lineCount - 1);
+        if (totalHeight > 0 && capH > 0 && totalHeight > capH) {
+          const scale = Math.max(0.5, Math.min(1, capH / totalHeight));
+          spansRef.current.forEach((span) => {
+            if (!span) return;
+            const size = parseFloat(span.style.fontSize) || 0;
+            span.style.fontSize = Math.floor(size * scale) + 'px';
+          });
+        }
       }
 
       // measure indices
