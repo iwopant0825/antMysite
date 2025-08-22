@@ -146,6 +146,7 @@ const Section = styled.section`
 
   @media (max-width: 1100px) {
     padding-left: 0;
+    margin-bottom: 90px;
     padding-top: 60px;
   }
 `;
