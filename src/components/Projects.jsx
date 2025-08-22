@@ -1,19 +1,41 @@
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
+import { useEffect, useRef, useState } from "react";
 import { projects, miniProjects } from "@/data/projects";
 
 export default function Projects() {
+  const [reveal, setReveal] = useState(false);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || reveal) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            setReveal(true);
+            io.disconnect();
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [reveal]);
+
   return (
-    <Section id="projects" tabIndex={-1}>
+    <Section id="projects" tabIndex={-1} ref={sectionRef}>
       <Grid>
         <Header>
           <Kicker>Projects</Kicker>
         </Header>
         <Cards>
-          {projects.map((p) => {
+          {projects.map((p, i) => {
             const showDemo = !!p.demo && p.demo !== '#' && p.demo !== '';
             const showGit = !!p.github && p.github !== '#' && p.github !== '';
             return (
-              <Card key={p.id}>
+              <Card key={p.id} $visible={reveal} style={{ '--delay': `${i * 80}ms` }}>
                 <Thumb style={{ backgroundImage: p.image?.endsWith('.svg') ? undefined : `url(${p.image})` }}>
                   {p.image?.endsWith('.svg') && <img src={p.image} alt="thumb" />}
                 </Thumb>
@@ -37,15 +59,15 @@ export default function Projects() {
           <SubTitle>More small projects</SubTitle>
         </MinorHeader>
         <MiniGrid>
-          {miniProjects.map((m) => {
+          {miniProjects.map((m, i) => {
             const link = m.link && m.link !== '#' ? m.link : null;
             return link ? (
-              <MiniCard key={m.id} href={link} target="_blank" rel="noreferrer">
+              <MiniCard key={m.id} href={link} target="_blank" rel="noreferrer" $visible={reveal} style={{ '--delay': `${i * 60}ms` }}>
                 <MiniTitle>{m.title}</MiniTitle>
                 <MiniDesc>{m.description}</MiniDesc>
               </MiniCard>
             ) : (
-              <MiniCard as="div" key={m.id} aria-disabled="true" style={{cursor:'default'}}>
+              <MiniCard as="div" key={m.id} aria-disabled="true" style={{cursor:'default', '--delay': `${i * 60}ms`}} $visible={reveal}>
                 <MiniTitle>{m.title}</MiniTitle>
                 <MiniDesc>{m.description}</MiniDesc>
               </MiniCard>
@@ -114,6 +136,8 @@ const MiniCard = styled.a`
   border-radius: 8px;
   transition: border-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
   &:hover { transform: translateY(-2px); border-color: #111214; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+  opacity: 0; transform: translateY(10px);
+  ${({ $visible }) => $visible && css`animation: ${projFade} .5s cubic-bezier(.2,.7,.2,1) var(--delay,0ms) forwards;`}
 `;
 
 const MiniTitle = styled.div`
@@ -141,6 +165,11 @@ const Cards = styled.div`
   gap: 16px;
 `;
 
+const projFade = keyframes`
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
 const Card = styled.div`
   width: 100%;
   border: 1px solid #d9d9dc;
@@ -152,6 +181,8 @@ const Card = styled.div`
   gap: 16px;
   align-items: center;
   transition: border-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+  opacity: 0; transform: translateY(10px);
+  ${({ $visible }) => $visible && css`animation: ${projFade} .5s cubic-bezier(.2,.7,.2,1) var(--delay,0ms) forwards;`}
 
   @media (max-width: 700px) {
     grid-template-columns: 1fr;
