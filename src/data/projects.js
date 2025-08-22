@@ -46,7 +46,37 @@ export const projects = [
         title: '문화유산 박물관 메타버스',
         description:
           '퀴즈를 맞추며 문화유산에 대해 알아가는 박물관 메타버스 웹사이트',
-        image: '/projectImg/4.png',
+        image: '/projectImg/5.png',
+        demo: 'https://museumcbg.pages.dev/',
+        github: '#',
+        tech: ['React', 'Figma'],
+      },  
+      {
+        id: 'p6',
+        title: 'CLIMATION',
+        description:
+          'CLIMATION은 기후 변화 대응을 위한 액션 플랫폼으로, Climate과 Action을 결합한 이름에서 알 수 있듯 지속가능한 미래를 위한 실질적 해결책을 제시합니다. 탄소 배출 감축, 재생 에너지 전환, 기후 적응 전략 등 다양한 주제를 다루며, 교육 콘텐츠와 커뮤니티를 통해 기후 행동을 확산시키는 것을 목표로 합니다.',
+        image: '/projectImg/6.png',
+        demo: 'https://museumcbg.pages.dev/',
+        github: '#',
+        tech: ['React', 'Figma'],
+      },  
+      {
+        id: 'p7',
+        title: 'REstyle',
+        description:
+          'REstyle은 지속가능한 패션을 지향하는 프로젝트입니다. Reuse, Restyle, Recycle을 핵심 가치로 삼아 기존 의류를 새롭게 스타일링하거나 업사이클링하는 방법을 제안합니다. 환경 친화적인 소재와 맞춤 제작, 지역 생산 방식을 통해 패션 산업의 환경적 부담을 줄이고, 새로운 패션 문화를 만들어갑니다.',
+        image: '/projectImg/7.png',
+        demo: 'https://museumcbg.pages.dev/',
+        github: '#',
+        tech: ['React', 'Figma'],
+      },  
+      {
+        id: 'p8',
+        title: 'AiGS',
+        description:
+          'AiGS는 인공지능 기반 솔루션과 연구를 다루는 프로젝트로, AI 기술을 통해 자동화, 데이터 인텔리전스, 워크플로우 최적화를 실현합니다. 또한 AI 거버넌스와 안전성까지 고려하여 기술의 긍정적 영향력을 확대하는 것을 목표로 합니다. 교육, 연구, 실제 활용까지 아우르는 AI 혁신 플랫폼입니다.',
+        image: '/projectImg/8.png',
         demo: 'https://museumcbg.pages.dev/',
         github: '#',
         tech: ['React', 'Figma'],
@@ -62,24 +92,6 @@ export const miniProjects = [
     description: '퀴즈를 맞추며 문화유산에 대해 알아가는 박물관 메타버스 웹사이트',
     link: 'https://museumcbg.pages.dev/'
   },
-  {
-    id: 'm2',
-    title: 'Shader Snippets',
-    description: '간단한 GLSL 셰이더 실험 모음.',
-    link: '#'
-  },
-  {
-    id: 'm3',
-    title: 'Scroll Playgrounds',
-    description: '스크롤 기반 패럴랙스/핀/리빌 테스트.',
-    link: '#'
-  },
-  {
-    id: 'm4',
-    title: 'Chart Widgets',
-    description: '경량 차트 위젯 몇 가지를 React로.',
-    link: '#'
-  }
 ];
 
 
