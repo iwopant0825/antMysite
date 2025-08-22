@@ -6,9 +6,8 @@ export default function Footer() {
       <Inner>
         <Brand>ChaHoRim — FE Developer</Brand>
         <Nav>
-          <a href="#">GitHub</a>
-          <a href="#">LinkedIn</a>
-          <a href="#">Email</a>
+          <a href="https://github.com/iwopant0825?tab=repositories">GitHub</a>
+          <a href="#">Email : ccodingpy0825@gmail.com</a>
         </Nav>
       </Inner>
     </Bar>
