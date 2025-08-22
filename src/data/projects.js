@@ -88,9 +88,9 @@ export const projects = [
 export const miniProjects = [
   {
     id: 'm1',
-    title: '문화유산 박물관 메타버스',
-    description: '퀴즈를 맞추며 문화유산에 대해 알아가는 박물관 메타버스 웹사이트',
-    link: 'https://museumcbg.pages.dev/'
+    title: 'iwop 웹사이트 리메이크',
+    description: '3d 넣어서 iwop 웹사이트 리메이크 함',
+    link: 'https://foriwop.pages.dev/'
   },
 ];
 
