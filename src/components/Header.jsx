@@ -12,10 +12,9 @@ export default function Header() {
     const id = href.slice(1);
     const el = document.getElementById(id);
     if (el) {
-      if (window.history && window.history.pushState) {
-        window.history.pushState(null, "", href);
-      } else {
-        window.location.hash = href;
+      // URL 해시를 변경하지 않고 스크롤만 수행
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
       }
       el.scrollIntoView({
         behavior: "smooth",
