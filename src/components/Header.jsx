@@ -87,7 +87,7 @@ const Aside = styled.aside`
   gap: 32px;
   padding: 28px 22px;
   background: transparent;
-  z-index: 60;
+  z-index: 3000; /* 부모 스택 컨텍스트를 충분히 크게 설정 */
   border-right: 1px solid #e0e0e0;
   background: rgb(255, 255, 255);
   /* initial reveal animation (desktop): left -> right */
@@ -114,6 +114,8 @@ const Aside = styled.aside`
     animation: ${keyframes`from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}`}
       0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 0.05s forwards;
     will-change: clip-path;
+    position: fixed; /* 상단 고정으로 스택 분리 */
+    left: 0; right: 0; top: 0;
   }
 `;
 
@@ -149,7 +151,7 @@ const Nav = styled.nav`
     top: 72px;
     left: 0;
     right: 0;
-    z-index: 61;
+    z-index: 2000; /* 모바일 드롭다운이 메인 콘텐츠 위로 오도록 보장 */
     background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(8px);
     padding: 20px 24px 28px;
@@ -236,7 +238,7 @@ const Backdrop = styled.div`
   @media (max-width: 1100px) {
     display: block;
     position: fixed;
-    z-index: 55;
+    z-index: 1990;
     inset: 72px 0 0 0;
     background: rgba(0, 0, 0, 0.15);
     opacity: ${({ $open }) => ($open ? 1 : 0)};
