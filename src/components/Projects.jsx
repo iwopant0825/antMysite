@@ -37,13 +37,20 @@ export default function Projects() {
           <SubTitle>More small projects</SubTitle>
         </MinorHeader>
         <MiniGrid>
-          {miniProjects.map((m) => (
-            <MiniCard key={m.id}>
-              <MiniTitle>{m.title}</MiniTitle>
-              <MiniDesc>{m.description}</MiniDesc>
-              {!!m.link && m.link !== '#' && <MiniLink href={m.link}>View</MiniLink>}
-            </MiniCard>
-          ))}
+          {miniProjects.map((m) => {
+            const link = m.link && m.link !== '#' ? m.link : null;
+            return link ? (
+              <MiniCard key={m.id} href={link} target="_blank" rel="noreferrer">
+                <MiniTitle>{m.title}</MiniTitle>
+                <MiniDesc>{m.description}</MiniDesc>
+              </MiniCard>
+            ) : (
+              <MiniCard as="div" key={m.id} aria-disabled="true" style={{cursor:'default'}}>
+                <MiniTitle>{m.title}</MiniTitle>
+                <MiniDesc>{m.description}</MiniDesc>
+              </MiniCard>
+            );
+          })}
         </MiniGrid>
       </Grid>
     </Section>
