@@ -5,7 +5,7 @@ export const projects = [
         id: 'p1',
         title: 'SaveQuest',
         description:
-          'SaveQuest는 게이미피케이션을 통해 절약을 재미있게 만드는 챌린지 기반 금융 앱입니다. 사용자는 일일·주간·월간 목표를 설정하고 진행 상황을 실시간으로 추적할 수 있으며, 목표 달성 시 포인트와 보상을 얻습니다. 또한 친구들과 함께 챌린지에 참여해 경쟁하거나, Tip Point 시스템을 통해 절약 팁을 공유하며 건전한 소비 습관을 형성하도록 돕습니다.',
+          'SaveQuest는 절약을 재미있게 만드는 챌린지 기반 금융 앱입니다. 사용자는 일일·주간·월간 목표를 설정하고 진행 상황을 실시간으로 추적할 수 있으며, 목표 달성 시 포인트와 보상을 얻습니다. 또한 친구들과 함께 챌린지에 참여해 경쟁하거나, Tip Point 시스템을 통해 절약 팁을 공유하며 건전한 소비 습관을 형성하도록 돕습니다.',
         image: '/projectImg/1.png',
         demo: '#',
         github: 'https://github.com/SaveQuest/frontend.git',
@@ -35,7 +35,7 @@ export const projects = [
         id: 'p4',
         title: '라움',
         description:
-          '라움은 선린인터넷고등학교 콘텐츠디자인과 일러스트 동아리의 입니다. 동아리 소개, 작품 전시, 활동 기록을 담아내는 웹사이트를 디자인하고 개발했습니다.',
+          '라움은 선린인터넷고등학교 콘텐츠디자인과 일러스트 동아리 입니다. 동아리 소개, 작품 전시, 활동 기록을 담아내는 웹사이트를 디자인하고 개발했습니다.',
         image: '/projectImg/4.png',
         demo: 'https://laum.pages.dev/',
         github: 'https://github.com/iwopant0825/LAUM.git',
