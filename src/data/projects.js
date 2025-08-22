@@ -45,7 +45,7 @@ export const projects = [
         id: 'p5',
         title: '문화유산 박물관 메타버스',
         description:
-          '퀴즈를 맞추며 문화유산에 대해 알아가는 박물관 메타버스 웹사이트',
+          '단순히 전시를 감상하는 것을 넘어, 퀴즈와 게임 요소를 통해 문화유산을 입체적으로 학습할 수 있는 메타버스 웹사이트입니다. 사용자는 가상 공간을 탐험하며 전시물과 관련된 문제를 풀고, 그 과정에서 역사적 맥락과 의미를 자연스럽게 이해하게 됩니다. 재미와 교육을 결합해, 누구나 몰입감 있게 문화유산을 경험할 수 있도록 설계했습니다.',
         image: '/projectImg/5.png',
         demo: 'https://museumcbg.pages.dev/',
         github: 'https://github.com/iwopant0825/MuseumCBG.git',
