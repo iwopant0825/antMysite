@@ -107,13 +107,13 @@ const Aside = styled.aside`
     padding: 12px 16px;
     border-right: none;
     border-bottom: 1px solid #e0e0e0;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgb(255, 255, 255);
     backdrop-filter: blur(6px);
-    /* mobile reveal: top -> bottom */
-    clip-path: inset(0 0 100% 0);
-    animation: ${keyframes`from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0 0 0 0)}`}
-      0.5s cubic-bezier(0.2, 0.7, 0.2, 1) 0.05s forwards;
-    will-change: clip-path;
+    /* mobile reveal: top -> bottom (초기엔 사용했으나 드롭다운 클리핑 방지를 위해 비활성화) */
+    /* clip-path 애니메이션이 자식 fixed 요소를 자르므로 제거 */
+    clip-path: none;
+    animation: none;
+    will-change: auto;
     position: fixed; /* 상단 고정으로 스택 분리 */
     left: 0; right: 0; top: 0;
   }
@@ -146,7 +146,7 @@ const Nav = styled.nav`
   @media (max-width: 1100px) {
     flex-direction: row;
     margin-top: 0;
-    gap: 22px;
+    gap: 32px; /* 드롭다운 항목 간격 확대 */
     position: fixed;
     top: 72px;
     left: 0;
@@ -154,7 +154,7 @@ const Nav = styled.nav`
     z-index: 2000; /* 모바일 드롭다운이 메인 콘텐츠 위로 오도록 보장 */
     background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(8px);
-    padding: 20px 24px 28px;
+    padding: 28px 24px 36px; /* 영역 여백 확대 */
     flex-direction: column;
     transform: ${({ $open }) =>
       $open ? "translateY(0)" : "translateY(-110%)"};
@@ -167,7 +167,7 @@ const Nav = styled.nav`
 
 const NavAnchor = styled.a`
   text-decoration: none;
-  color: #7a7f87;
+  color: #414246;
   font-size: 14px;
   cursor: pointer;
   outline: none;
