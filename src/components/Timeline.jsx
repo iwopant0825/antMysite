@@ -170,7 +170,7 @@ const Dot = styled.span`
   width: 14px;
   height: 14px;
   background: #111214;
-  border: 2px solid #111214;
+  border: 1px solid #111214;
   border-radius: 0; /* 각진 점 */
   position: relative;
   top: 4px;

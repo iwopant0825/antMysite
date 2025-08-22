@@ -583,7 +583,7 @@ const Section = styled.section`
 
   /* Mobile (≤1100): 상단 고정 헤더(72px)를 제외하고 꽉 차게 */
   @media (max-width: 1100px) {
-    margin-top: 72px;
+    margin-top: 92px;
     /* 너무 작거나 너무 커지지 않도록 안전 범위 */
     min-height: clamp(680px, calc(100dvh - 72px), 980px);
     --sidebar: 0px;

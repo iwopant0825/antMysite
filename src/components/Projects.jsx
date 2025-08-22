@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { projects, miniProjects } from "@/data/projects";
 
 export default function Projects() {
   return (
@@ -8,19 +9,42 @@ export default function Projects() {
           <Kicker>Projects</Kicker>
         </Header>
         <Cards>
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
-              <Thumb />
-              <CardBody>
-                <CardTitle>Project #{i + 1}</CardTitle>
-                <CardText>
-                  인터랙티브 웹 실험과 3D 요소를 결합한 데모 프로젝트입니다. 반응형,
-                  접근성, 성능을 고려해 제작했습니다.
-                </CardText>
-              </CardBody>
-            </Card>
-          ))}
+          {projects.map((p) => {
+            const showDemo = !!p.demo && p.demo !== '#' && p.demo !== '';
+            const showGit = !!p.github && p.github !== '#' && p.github !== '';
+            return (
+              <Card key={p.id}>
+                <Thumb style={{ backgroundImage: p.image?.endsWith('.svg') ? undefined : `url(${p.image})` }}>
+                  {p.image?.endsWith('.svg') && <img src={p.image} alt="thumb" />}
+                </Thumb>
+                <CardBody>
+                  <CardTitle>{p.title}</CardTitle>
+                  <CardText>{p.description}</CardText>
+                  {(showDemo || showGit) && (
+                    <Actions>
+                      {showDemo && <A href={p.demo} target="_blank" rel="noreferrer">Demo</A>}
+                      {showGit && <A href={p.github} target="_blank" rel="noreferrer">GitHub</A>}
+                    </Actions>
+                  )}
+                  {p.tech && (<Techs>{p.tech.map((t) => (<li key={t}>{t}</li>))}</Techs>)}
+                </CardBody>
+              </Card>
+            );
+          })}
         </Cards>
+
+        <MinorHeader>
+          <SubTitle>More small projects</SubTitle>
+        </MinorHeader>
+        <MiniGrid>
+          {miniProjects.map((m) => (
+            <MiniCard key={m.id}>
+              <MiniTitle>{m.title}</MiniTitle>
+              <MiniDesc>{m.description}</MiniDesc>
+              {!!m.link && m.link !== '#' && <MiniLink href={m.link}>View</MiniLink>}
+            </MiniCard>
+          ))}
+        </MiniGrid>
       </Grid>
     </Section>
   );
@@ -53,6 +77,54 @@ const Kicker = styled.h3`
   color: #000000;
   font-size: 20px;
   font-weight: 800;
+`;
+const MinorHeader = styled.div`
+  margin-top: 36px;
+  margin-bottom: 12px;
+`;
+
+const SubTitle = styled.h4`
+  color: #0b0c0e;
+  font-weight: 800;
+`;
+
+const MiniGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const MiniCard = styled.a`
+  display: block;
+  border: 1px solid #e4e4e7;
+  padding: 14px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+  transition: border-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+  &:hover { transform: translateY(-2px); border-color: #111214; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+`;
+
+const MiniTitle = styled.div`
+  font-weight: 700;
+`;
+
+const MiniDesc = styled.div`
+  margin-top: 6px;
+  color: #555;
+  line-height: 1.55;
+`;
+
+const MiniLink = styled.span`
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #0b0c0e;
+  text-decoration: underline;
 `;
 
 
@@ -87,7 +159,7 @@ const Card = styled.div`
 
 const Thumb = styled.div`
   width: 100%;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 1 / 1; /* 정사각형 */
   background: linear-gradient(
       180deg,
       rgba(255, 255, 255, 0.06) 0%,
@@ -96,11 +168,45 @@ const Thumb = styled.div`
     repeating-linear-gradient(135deg, #0f1012 0 8px, #141518 8px 16px);
   border: 1px solid #cfcfd4;
   border-radius: 0; /* 각진 썸네일 */
+  background-size: cover;
+  background-position: center;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  img { max-width: 80%; height: auto; }
 `;
 
 const CardBody = styled.div`
   display: grid;
   gap: 8px;
+`;
+
+const Actions = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+`;
+
+const A = styled.a`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid #d9d9dc;
+  border-radius: 6px;
+  color: #0b0c0e;
+  text-decoration: none;
+  font-size: 13px;
+`;
+
+const Techs = styled.ul`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  list-style: none;
+  padding: 0;
+  li { font-size: 12px; color: #444; }
 `;
 
 const CardTitle = styled.h4`
