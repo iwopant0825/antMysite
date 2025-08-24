@@ -87,16 +87,16 @@ const Aside = styled.aside`
   gap: 32px;
   padding: 28px 22px;
   background: transparent;
-  z-index: 3000; /* 부모 스택 컨텍스트를 충분히 크게 설정 */
-  border-right: 1px solid #e0e0e0;
-  background: rgb(255, 255, 255);
+  z-index: ${({ theme }) => theme.z.header};
+  border-right: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.surface};
   /* initial reveal animation (desktop): left -> right */
   clip-path: inset(0 100% 0 0);
   animation: ${keyframes`from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}`}
     0.6s cubic-bezier(0.2, 0.7, 0.2, 1) 0.1s forwards;
   will-change: clip-path;
 
-  @media (max-width: 1100px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}px) {
     inset: 0 0 auto 0;
     width: 100%;
     height: 72px;
@@ -106,8 +106,8 @@ const Aside = styled.aside`
     justify-content: space-between;
     padding: 12px 16px;
     border-right: none;
-    border-bottom: 1px solid #e0e0e0;
-    background: rgb(255, 255, 255);
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+    background: ${({ theme }) => theme.colors.surface};
     backdrop-filter: blur(6px);
     /* mobile reveal: top -> bottom (초기엔 사용했으나 드롭다운 클리핑 방지를 위해 비활성화) */
     /* clip-path 애니메이션이 자식 fixed 요소를 자르므로 제거 */
@@ -121,7 +121,7 @@ const Aside = styled.aside`
 
 const Small = styled.div`
   font-size: 12px;
-  color: #6b6f76;
+  color: ${({ theme }) => theme.colors.textMuted};
   line-height: 1.5;
 `;
 
@@ -143,16 +143,16 @@ const Nav = styled.nav`
   gap: 14px;
   margin-top: 40px;
 
-  @media (max-width: 1100px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}px) {
     flex-direction: row;
     margin-top: 0;
     gap: 32px; /* 드롭다운 항목 간격 확대 */
     position: fixed;
-    top: 72px;
+    top: ${({ theme }) => theme.layout.headerHeightMobile}px;
     left: 0;
     right: 0;
-    z-index: 2000; /* 모바일 드롭다운이 메인 콘텐츠 위로 오도록 보장 */
-    background: rgba(255, 255, 255, 0.96);
+    z-index: ${({ theme }) => theme.z.dropdown};
+    background: ${({ theme }) => theme.colors.surfaceMuted};
     backdrop-filter: blur(8px);
     padding: 28px 24px 36px; /* 영역 여백 확대 */
     flex-direction: column;
@@ -167,19 +167,19 @@ const Nav = styled.nav`
 
 const NavAnchor = styled.a`
   text-decoration: none;
-  color: #414246;
+  color: ${({ theme }) => theme.colors.textSubtle};
   font-size: 14px;
   cursor: pointer;
   outline: none;
   &:focus-visible {
-    color: #111;
+    color: ${({ theme }) => theme.colors.text};
     text-decoration: underline;
   }
   &:hover {
-    color: #111;
+    color: ${({ theme }) => theme.colors.text};
   }
 
-  @media (max-width: 1100px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}px) {
     text-align: center;
   }
 `;
@@ -191,13 +191,13 @@ const RightGroup = styled.div`
 `;
 
 const Year = styled.div`
-  color: #282828;
+  color: ${({ theme }) => theme.colors.text};
   font-weight: 700;
 `;
 
 const MenuBtn = styled.button`
   display: none;
-  @media (max-width: 1100px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}px) {
     display: inline-flex;
     width: 40px;
     height: 40px;
@@ -205,8 +205,8 @@ const MenuBtn = styled.button`
     justify-content: center;
     flex-direction: column;
     gap: 6px;
-    background: rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: ${({ theme }) => theme.colors.overlaySoftBg};
+    border: 1px solid ${({ theme }) => theme.colors.overlaySoftBorder};
     border-radius: 12px;
   }
 `;
@@ -214,7 +214,7 @@ const MenuBtn = styled.button`
 const Bar = styled.span`
   width: 22px;
   height: 2px;
-  background: #111;
+  background: ${({ theme }) => theme.colors.text};
   display: block;
   border-radius: 2px;
   transition: transform 0.35s ease, opacity 0.25s ease;

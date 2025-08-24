@@ -15,9 +15,9 @@ export default function Footer() {
 }
 
 const Bar = styled.footer`
-  background: rgba(255, 255, 255, 0.9);
+  background: ${({ theme }) => theme.colors.surfaceMuted};
   backdrop-filter: blur(8px);
-  border-top: 1px solid #eaeaea;
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
   width: 100%;
 `;
 
@@ -30,7 +30,7 @@ const Inner = styled.div`
   justify-content: space-between;
   gap: 16px;
 
-  @media (max-width: 1100px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}px) {
     padding: 12px 16px;
     gap: 12px;
   }
@@ -38,9 +38,9 @@ const Inner = styled.div`
 
 const Brand = styled.div`
   font-weight: 700;
-  color: #111;
+  color: ${({ theme }) => theme.colors.text};
   font-size: 14px;
-  @media (max-width: 1100px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}px) {
     font-size: 13px;
   }
 `;
@@ -50,15 +50,15 @@ const Nav = styled.nav`
   align-items: center;
   gap: 16px;
   a {
-    color: #444;
+    color: ${({ theme }) => theme.colors.textSecondary};
     text-decoration: none;
     font-size: 13px;
   }
   a:hover {
-    color: #000;
+    color: ${({ theme }) => theme.colors.text};
   }
 
-  @media (max-width: 700px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.small}px) {
     gap: 12px;
     a {
       font-size: 12px;

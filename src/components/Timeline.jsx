@@ -39,7 +39,7 @@ export default function Timeline() {
     {
       date: "2024",
       title: "STA+C 2024 참여",
-      desc: "Smart Teen App Challenge 2024에 참여하여 결선까지 진출하고 가작상을 받음.",
+      desc: "Smart Teen App Challenge 2024에 참여하여 결선까지 진출함.",
     },
     {
       date: "2024",
