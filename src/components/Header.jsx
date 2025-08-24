@@ -52,11 +52,11 @@ export default function Header() {
           <NavAnchor href="#skills" onClick={onNavClick}>
             Skills
           </NavAnchor>
-          <NavAnchor href="#projects" onClick={onNavClick}>
-            Projects
-          </NavAnchor>
           <NavAnchor href="#timeline" onClick={onNavClick}>
             Timeline
+          </NavAnchor>
+          <NavAnchor href="#projects" onClick={onNavClick}>
+            Projects
           </NavAnchor>
         </Nav>
         <RightGroup>
