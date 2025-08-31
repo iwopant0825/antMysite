@@ -4,6 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Center, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { LogoModel } from "./LogoModel";
+import { motion, useReducedMotion } from "framer-motion";
 
 function Box() {
   return (
@@ -542,18 +543,59 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
     <BigWords ref={containerRef}>
       {lines.map((t, i) => {
         const display = String(t).replace(/&nbsp;/g, "\u00A0");
+        const isCha = String(t)
+          .replace(/&nbsp;/g, "")
+          .replace(/\s+/g, "")
+          .toUpperCase()
+          .includes("CHAHORIM");
         return (
           <Line
             key={i}
             className={isStrong(t) ? "strong" : ""}
             ref={(el) => (spansRef.current[i] = el)}
-            style={{ "--delay": `${i * 120}ms` }}
+            style={{ "--delay": `${i * 120}ms`, color: isCha ? "transparent" : undefined }}
           >
-            {display}
+            {isCha ? (
+              <>
+                <span className="__base_text" aria-hidden="true" style={{ visibility: "hidden" }}>
+                  {display}
+                </span>
+                <DrawCha text={display} delayMs={600 + i * 120} />
+              </>
+            ) : (
+              display
+            )}
           </Line>
         );
       })}
     </BigWords>
+  );
+}
+
+function DrawCha({ text, delayMs = 600 }) {
+  const reduce = useReducedMotion();
+  const baseDelay = Math.max(0, delayMs);
+  const strokeDur = 1.1;
+  const fillDur = 0.6;
+  return (
+    <DrawWrap aria-hidden="true">
+      <motion.span
+        className="stroke"
+        initial={{ clipPath: "inset(0 100% 0 0)" }}
+        animate={{ clipPath: reduce ? "inset(0 0% 0 0)" : "inset(0 0% 0 0)" }}
+        transition={{ delay: baseDelay / 1000, duration: strokeDur, ease: [0.2, 0.7, 0.2, 1] }}
+      >
+        {text}
+      </motion.span>
+      <motion.span
+        className="fill"
+        initial={{ clipPath: "inset(0 100% 0 0)" }}
+        animate={{ clipPath: reduce ? "inset(0 0% 0 0)" : "inset(0 0% 0 0)" }}
+        transition={{ delay: baseDelay / 1000 + 0.45, duration: fillDur, ease: [0.2, 0.7, 0.2, 1] }}
+      >
+        {text}
+      </motion.span>
+    </DrawWrap>
   );
 }
 
@@ -654,6 +696,34 @@ const Line = styled.span`
   animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
   animation-fill-mode: both;
   animation-delay: var(--delay, 0ms);
+  position: relative;
+`;
+
+const DrawWrap = styled.span`
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  display: inline-block;
+  pointer-events: none;
+
+  .stroke, .fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    white-space: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+    font: inherit;
+    will-change: clip-path;
+  }
+  .stroke {
+    -webkit-text-stroke: 2px #000000;
+    color: transparent;
+  }
+  .fill {
+    color: #000000;
+  }
 `;
 
 const InfoCard = styled.div`
