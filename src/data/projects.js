@@ -9,7 +9,7 @@ export const projects = [
         image: '/projectImg/1.png',
         demo: '#',
         github: 'https://github.com/SaveQuest/frontend.git',
-        tech: ['React Native', 'Figma'],
+        tech: ['React Native', 'Figma','Framer Motion','Typescript'],
       },
       {
         id: 'p2',

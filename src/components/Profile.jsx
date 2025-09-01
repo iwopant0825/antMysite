@@ -42,6 +42,31 @@ export default function Profile() {
           </StampRow>
           <Kicker data-visible={hasStarted ? "1" : "0"}>개발자 차호림</Kicker>
 
+          <SocialRow>
+            <IconBtn
+              href="https://www.instagram.com/smallants.0825/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram 열기(새 탭)"
+              title="Instagram"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3.5A5.5 5.5 0 1 1 6.5 13 5.5 5.5 0 0 1 12 7.5zm0 2A3.5 3.5 0 1 0 15.5 13 3.5 3.5 0 0 0 12 9.5zM18 6.25a1.25 1.25 0 1 1-1.25 1.25A1.25 1.25 0 0 1 18 6.25z" fill="currentColor"/>
+              </svg>
+            </IconBtn>
+            <IconBtn
+              href="https://github.com/iwopant0825"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub 열기(새 탭)"
+              title="GitHub"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.69c-2.78.61-3.37-1.19-3.37-1.19-.46-1.16-1.12-1.47-1.12-1.47-.92-.63.07-.62.07-.62 1.02.07 1.56 1.05 1.56 1.05.9 1.55 2.36 1.1 2.94.84.09-.66.35-1.1.63-1.36-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.56 9.56 0 0 1 12 6.8c.85 0 1.71.11 2.51.32 1.9-1.29 2.74-1.02 2.74-1.02.56 1.37.21 2.39.11 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.86v2.76c0 .26.18.57.69.48A10 10 0 0 0 12 2z" fill="currentColor"/>
+              </svg>
+            </IconBtn>
+          </SocialRow>
+
           <TypeWrap>
             <Sizer aria-hidden="true">{fullText}</Sizer>
             <TypeParagraph aria-label="소개 문장 타이핑">
@@ -163,6 +188,38 @@ const Stamp = styled.div`
   &[data-visible="1"] {
     opacity: 1;
     transform: translateY(0);
+  }
+`;
+
+const SocialRow = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
+const IconBtn = styled.a`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  color: #111;
+  background: #fff;
+  text-decoration: none;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+
+  &:hover {
+    background: #111214;
+    color: #fff;
+    border-color: #111214;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #5560ff;
+    outline-offset: 2px;
   }
 `;
 
