@@ -37,8 +37,32 @@ export default function Projects() {
                   <CardText>{p.description}</CardText>
                   {(showDemo || showGit) && (
                     <Actions>
-                      {showDemo && <A href={p.demo} target="_blank" rel="noreferrer">Demo</A>}
-                      {showGit && <A href={p.github} target="_blank" rel="noreferrer">GitHub</A>}
+                      {showDemo && (
+                        <A
+                          $variant="demo"
+                          href={p.demo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`‘${p.title}’ 데모 열기(새 탭)`}
+                          title={`${p.title} · Demo`}
+                        >
+                          <span className="label">Demo</span>
+                          <span className="icon" aria-hidden>↗</span>
+                        </A>
+                      )}
+                      {showGit && (
+                        <A
+                          $variant="github"
+                          href={p.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`‘${p.title}’ GitHub 저장소 열기(새 탭)`}
+                          title={`${p.title} · GitHub`}
+                        >
+                          <span className="label">GitHub</span>
+                          <span className="icon" aria-hidden>↗</span>
+                        </A>
+                      )}
                     </Actions>
                   )}
                   {p.tech && (<Techs>{p.tech.map((t) => (<li key={t}>{t}</li>))}</Techs>)}
@@ -216,18 +240,51 @@ const Actions = styled.div`
   display: flex;
   gap: 10px;
   margin-top: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  
+  &::before {
+    content: "Quick links:";
+    color: #6b6f76;
+    font-size: 12px;
+    margin-right: 6px;
+  }
 `;
 
 const A = styled.a`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 12px;
+  gap: 8px;
+  padding: 9px 12px;
   border: 1px solid #d9d9dc;
-  border-radius: 6px;
+  border-radius: 8px;
   color: #0b0c0e;
   text-decoration: none;
   font-size: 13px;
+  background: #f7f7f8;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+
+  .icon { opacity: 0.7; transition: transform 180ms ease, opacity 180ms ease; }
+
+  &:hover {
+    background: #111214;
+    color: #ffffff;
+    border-color: #111214;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    .icon { opacity: 1; transform: translateY(-1px); }
+  }
+
+  &:focus-visible {
+    outline: 2px solid #5560ff;
+    outline-offset: 2px;
+  }
+
+  &[data-disabled="true"] {
+    opacity: 0.5;
+    pointer-events: none;
+  }
 `;
 
 const Techs = styled.ul`
