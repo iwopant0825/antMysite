@@ -548,19 +548,20 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
           .replace(/\s+/g, "")
           .toUpperCase()
           .includes("CHAHORIM");
+        const lineDelayMs = isCha ? 240 : i * 120;
         return (
           <Line
             key={i}
             className={isStrong(t) ? "strong" : ""}
             ref={(el) => (spansRef.current[i] = el)}
-            style={{ "--delay": `${i * 120}ms`, color: isCha ? "transparent" : undefined }}
+            style={{ "--delay": `${lineDelayMs}ms`, color: isCha ? "transparent" : undefined }}
           >
             {isCha ? (
               <>
                 <span className="__base_text" aria-hidden="true" style={{ visibility: "hidden" }}>
                   {display}
                 </span>
-                <DrawCha text={display} delayMs={600 + i * 120} />
+                <DrawCha text={display} delayMs={420} />
               </>
             ) : (
               display
@@ -575,7 +576,7 @@ function FitBigWords({ lines, onMeasureCha, rainbowProgress = 0 }) {
 function DrawCha({ text, delayMs = 600 }) {
   const reduce = useReducedMotion();
   const baseDelay = Math.max(0, delayMs);
-  const strokeDur = 1.1;
+  const strokeDur = 0.9;
   const fillDur = 0.6;
   return (
     <DrawWrap aria-hidden="true">
@@ -591,7 +592,7 @@ function DrawCha({ text, delayMs = 600 }) {
         className="fill"
         initial={{ clipPath: "inset(0 100% 0 0)" }}
         animate={{ clipPath: reduce ? "inset(0 0% 0 0)" : "inset(0 0% 0 0)" }}
-        transition={{ delay: baseDelay / 1000 + 0.45, duration: fillDur, ease: [0.2, 0.7, 0.2, 1] }}
+        transition={{ delay: baseDelay / 1000 + 0.35, duration: fillDur, ease: [0.2, 0.7, 0.2, 1] }}
       >
         {text}
       </motion.span>
