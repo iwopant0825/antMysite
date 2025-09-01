@@ -1,23 +1,15 @@
 import styled from "styled-components";
 import { useEffect, useRef, useState } from "react";
+import { observeOnce } from "@/utils/dom";
 
 export default function Skills() {
   const sectionRef = useRef(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) setVisible(true);
-        });
-      },
-      { root: null, rootMargin: "0px 0px -20% 0px", threshold: 0.2 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
+    return observeOnce(sectionRef.current, () => setVisible(true), {
+      root: null, rootMargin: "0px 0px -20% 0px", threshold: 0.2,
+    });
   }, []);
 
   const logos = [

@@ -1,5 +1,6 @@
 import styled, { css, keyframes } from "styled-components";
 import { useState } from "react";
+import { safeFocus } from "@/utils/dom";
 import LogoSvg from "/Logo.svg";
 
 export default function Header() {
@@ -21,16 +22,7 @@ export default function Header() {
         block: "start",
         inline: "nearest",
       });
-      window.setTimeout(() => {
-        try {
-          el.focus({ preventScroll: true });
-        } catch (_) {
-          try {
-            el.setAttribute("tabindex", "-1");
-            el.focus({ preventScroll: true });
-          } catch (_) {}
-        }
-      }, 300);
+      window.setTimeout(() => safeFocus(el), 300);
     }
     close();
   };

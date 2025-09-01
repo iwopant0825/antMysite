@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, Text } from "@react-three/drei";
 import * as THREE from "three";
+import { clamp } from "@/utils/math";
+import { getDeviceByWidth, onResize } from "@/utils/device";
 
 export default function Immersion() {
   const sectionRef = useRef(null);
@@ -16,21 +18,15 @@ export default function Immersion() {
 
   const [device, setDevice] = useState("desktop");
   useEffect(() => {
-    const detect = () => {
-      const w = window.innerWidth || 1200;
-      if (w <= 700) setDevice("mobile");
-      else if (w <= 1100) setDevice("tablet");
-      else setDevice("desktop");
-    };
-    detect();
-    window.addEventListener("resize", detect, { passive: true });
-    return () => window.removeEventListener("resize", detect);
+    const width = window.innerWidth || 1200;
+    setDevice(getDeviceByWidth(width));
+    return onResize((w) => setDevice(getDeviceByWidth(w)));
   }, []);
 
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
-    const clamp01 = (v) => Math.max(0, Math.min(1, v));
+    const clamp01 = (v) => clamp(v, 0, 1);
 
     const ensureRAF = () => {
       if (rafRef.current) return;

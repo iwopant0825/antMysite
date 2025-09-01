@@ -6,15 +6,6 @@ import * as THREE from "three";
 import { LogoModel } from "./LogoModel";
 import { motion, useReducedMotion } from "framer-motion";
 
-function Box() {
-  return (
-    <mesh>
-      <boxGeometry args={[3, 3, 3]} />
-      <meshStandardMaterial color="#5560ff" metalness={0.3} roughness={0.4} />
-    </mesh>
-  );
-}
-
 export default function Hero() {
   const [chaRect, setChaRect] = useState(null);
   const [isMobile, setIsMobile] = useState(
@@ -181,6 +172,7 @@ export default function Hero() {
   return (
     <Section id="hero" ref={sectionRef} tabIndex={-1}>
       <Container>
+        <VisuallyHiddenH1>ChaHoRim — Frontend Developer Portfolio</VisuallyHiddenH1>
         {(() => {
           const lines = isMobile
             ? ["FE", "DEVELOPER", "Interactive Web", "ChaHoRim"]
@@ -297,18 +289,7 @@ export default function Hero() {
             )}
           </Canvas>
         </ModelOverlay>
-        {/* <InfoCard>
-          <InfoTitle>
-            <Typewriter text="FE Developer" speed={80} startDelay={120} />
-          </InfoTitle>
-          <InfoText>
-            <Typewriter
-              text={"I specialize in building interactive and responsive web experiences that adapt seamlessly across devices. With a focus on clean code and modern frameworks, I transform complex ideas into efficient and scalable solutions. My goal is to craft user-centered interfaces that combine performance, accessibility, and elegant design."}
-              speed={120}
-              startDelay={520}
-            />
-          </InfoText>
-        </InfoCard> */}
+        {/* info card removed in redesign */}
 
         <HeroGrid>
           <LeftRail />
@@ -644,6 +625,18 @@ const Container = styled.div`
   padding: 40px 24px 80px;
 `;
 
+const VisuallyHiddenH1 = styled.h1`
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+`;
+
 const BigWords = styled.div`
   position: absolute;
   inset: 0 auto auto 0; /* left:0; top:0 */
@@ -727,48 +720,7 @@ const DrawWrap = styled.span`
   }
 `;
 
-const InfoCard = styled.div`
-  position: relative;
-  margin-left: calc(clamp(24px, 12vw, 260px) + 200px);
-  margin-top: clamp(-24px, -1.8vw, 20px); /* 더 살짝 아래로 */
-  width: min(36ch, 40vw);
-  max-width: 520px;
-
-  @media (max-width: 1299px) and (min-width: 861px) {
-    margin-left: calc(clamp(24px, 10vw, 200px) + 100px);
-    margin-top: clamp(-16px, -1.5vw, 18px);
-    width: min(38ch, 48vw);
-  }
-
-  @media (max-width: 1024px) {
-    margin-left: calc(clamp(16px, 6vw, 120px) + 12px);
-    margin-top: clamp(-8px, -1vw, 18px);
-    width: min(42ch, 56vw);
-  }
-
-  @media (max-width: 1100px) {
-    margin-left: 16px;
-    width: 90%;
-    max-width: none;
-  }
-`;
-
-const InfoTitle = styled.div`
-  color: #111111;
-  font-weight: 700;
-  margin-bottom: 10px;
-  font-size: clamp(16px, 2.2vw, 20px);
-  -webkit-text-stroke: 0.35px rgba(255, 255, 255, 0.45);
-  text-shadow: 0 1px 1px rgb(255, 255, 255);
-`;
-
-const InfoText = styled.p`
-  color: #2f343a;
-  font-size: clamp(13px, 1.8vw, 14px);
-  line-height: 1.6;
-  -webkit-text-stroke: 0.25px rgba(255, 255, 255, 0.35);
-  text-shadow: 0 1px 1px rgb(255, 255, 255);
-`;
+/* Info card styles removed */
 
 const HeroGrid = styled.div`
   position: relative;
@@ -781,12 +733,7 @@ const HeroGrid = styled.div`
 
 const LeftRail = styled.div``;
 
-const Center3D = styled.div`
-  height: clamp(380px, 55vh, 560px);
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-`;
+/* Center3D removed */
 
 const RightRail = styled.div``;
 
@@ -803,32 +750,9 @@ const ModelOverlay = styled.div`
   }
 `;
 
-const ModelWrap = styled.div`
-  position: relative;
-  margin-top: 240px;
-  border-radius: 24px;
-  overflow: hidden;
-  height: clamp(300px, 50vh, 520px);
-  z-index: 1; /* keep below absolute BigWords (z-index default stacking) */
-  /* lock to content left, with fine offset that adapts by width */
-  width: clamp(540px, 60vw, var(--contentW));
-  max-width: var(--contentW);
-  --model-offset: clamp(120px, 10vw, 420px);
-  margin-left: calc((100vw - var(--contentW)) / 2 - var(--model-offset));
-  margin-right: auto;
-  overscroll-behavior: contain;
+/* ModelWrap removed */
 
-  @media (max-width: 1100px) {
-    width: min(96vw, var(--contentW));
-    --model-offset: 0px;
-    margin-left: calc((100vw - var(--contentW)) / 2);
-  }
-`;
-
-const ModelInner = styled.div`
-  width: 100%;
-  height: 100%;
-`;
+/* ModelInner removed */
 
 function MouseLight() {
   const ref = useRef(null);
@@ -916,34 +840,7 @@ function Appear3D({ initialScale = 0.04, children }) {
   return <group ref={group}>{children}</group>;
 }
 
-function Typewriter({ text, speed = 30, startDelay = 0 }) {
-  const [shown, setShown] = useState(0);
-  useEffect(() => {
-    let timerId = 0;
-    let loopId = 0;
-    const start = () => {
-      // speed: chars per second
-      const tickMs = 16; // ~60fps
-      const charsPerTick = Math.max(1, Math.round((speed * tickMs) / 1000));
-      loopId = window.setInterval(() => {
-        setShown((s) => {
-          if (s >= text.length) {
-            window.clearInterval(loopId);
-            return s;
-          }
-          return Math.min(text.length, s + charsPerTick);
-        });
-      }, tickMs);
-    };
-    if (startDelay > 0) timerId = window.setTimeout(start, startDelay);
-    else start();
-    return () => {
-      if (timerId) window.clearTimeout(timerId);
-      if (loopId) window.clearInterval(loopId);
-    };
-  }, [text, speed, startDelay]);
-  return <span>{text.slice(0, shown)}</span>;
-}
+// Typewriter removed
 
 function ResponsiveModel() {
   const { size } = useThree();

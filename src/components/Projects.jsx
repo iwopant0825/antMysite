@@ -1,5 +1,6 @@
 import styled, { css, keyframes } from "styled-components";
 import { useEffect, useRef, useState } from "react";
+import { observeOnce } from "@/utils/dom";
 import { projects, miniProjects } from "@/data/projects";
 
 export default function Projects() {
@@ -7,28 +8,13 @@ export default function Projects() {
   const sectionRef = useRef(null);
 
   useEffect(() => {
-    const el = sectionRef.current;
     if (reveal) return;
-    // 모바일 구형 브라우저 호환 및 보수적인 감지 설정
-    if (el && 'IntersectionObserver' in window) {
-      const io = new IntersectionObserver(
-        (entries) => {
-          for (const e of entries) {
-            if (e.isIntersecting) {
-              setReveal(true);
-              io.disconnect();
-              break;
-            }
-          }
-        },
-        { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.01 }
-      );
-      io.observe(el);
-      return () => io.disconnect();
-    } else {
-      const t = setTimeout(() => setReveal(true), 100);
-      return () => clearTimeout(t);
-    }
+    const el = sectionRef.current;
+    return observeOnce(el, () => setReveal(true), {
+      root: null,
+      rootMargin: '0px 0px -10% 0px',
+      threshold: 0.01,
+    });
   }, [reveal]);
 
   return (

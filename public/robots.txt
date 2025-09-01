@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chahorim.pages.dev/sitemap.xml
+
+

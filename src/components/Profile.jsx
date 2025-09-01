@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import Polygon from "/Polygon.svg";
 import { useEffect, useRef, useState } from "react";
+import { observeOnce } from "@/utils/dom";
 
 export default function Profile() {
   const sectionRef = useRef(null);
@@ -11,22 +12,10 @@ export default function Profile() {
     "저는 사용자 경험을 최우선으로 생각하는 프론트엔드 개발자입니다. 깔끔한 코드와 감각적인 디자인을 결합해 매끄럽고 반응형인 웹 인터페이스를 구현하는 데 집중합니다. React, Three.js, Tailwind 등 다양한 최신 기술을 활용하며, 단순한 화면을 넘어서 사용자와 소통하는 경험을 설계하는 것을 목표로 합니다. 항상 배우고 성장하며, 새로운 시도를 통해 더 나은 웹을 만들어가는 개발자가 되고자 합니다.";
 
   useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasStarted) {
-            setHasStarted(true);
-          }
-        });
-      },
-      { root: null, rootMargin: "0px 0px -20% 0px", threshold: 0.2 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
+    if (hasStarted) return;
+    return observeOnce(sectionRef.current, () => setHasStarted(true), {
+      root: null, rootMargin: "0px 0px -20% 0px", threshold: 0.2
+    });
   }, [hasStarted]);
 
   useEffect(() => {
