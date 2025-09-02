@@ -10,24 +10,25 @@ export default function CursorGlass() {
   const [enabled, setEnabled] = useState(true);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    // disable on coarse pointer devices
-    let coarse = false;
-    if (window.matchMedia) {
-      const mql = window.matchMedia('(pointer: coarse)');
-      coarse = !!mql.matches;
-      const onChange = () => setEnabled(!mql.matches);
-      if (mql.addEventListener) mql.addEventListener('change', onChange);
-      else if (mql.addListener) mql.addListener(onChange);
-      return () => {
-        if (mql.removeEventListener) mql.removeEventListener('change', onChange);
-        else if (mql.removeListener) mql.removeListener(onChange);
-      };
-    }
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mqlCoarse = window.matchMedia('(pointer: coarse)');
+    const mqlNarrow = window.matchMedia('(max-width: 1100px)');
+    const update = () => setEnabled(!mqlCoarse.matches && !mqlNarrow.matches);
+    update();
+    if (mqlCoarse.addEventListener) mqlCoarse.addEventListener('change', update);
+    else if (mqlCoarse.addListener) mqlCoarse.addListener(update);
+    if (mqlNarrow.addEventListener) mqlNarrow.addEventListener('change', update);
+    else if (mqlNarrow.addListener) mqlNarrow.addListener(update);
+    return () => {
+      if (mqlCoarse.removeEventListener) mqlCoarse.removeEventListener('change', update);
+      else if (mqlCoarse.removeListener) mqlCoarse.removeListener(update);
+      if (mqlNarrow.removeEventListener) mqlNarrow.removeEventListener('change', update);
+      else if (mqlNarrow.removeListener) mqlNarrow.removeListener(update);
+    };
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!enabled || typeof window === 'undefined') return;
     // reduced motion respects still movement but snaps faster
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -68,7 +69,7 @@ export default function CursorGlass() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = 0;
     };
-  }, []);
+  }, [enabled]);
 
   if (!enabled) return null;
   return (
