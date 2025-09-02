@@ -8,6 +8,7 @@ import Timeline from "./components/Timeline";
 import Footer from "./components/Footer";
 import { useEffect, useState } from "react";
 import Loading from "./components/Loading";
+import CursorGlass from "./components/CursorGlass";
 
 export default function App() {
   const [loaded, setLoaded] = useState(false);
@@ -18,6 +19,7 @@ export default function App() {
   }, []);
   return (
     <>
+      <CursorGlass />
       <Loading done={loaded} />
       {loaded && (
         <>

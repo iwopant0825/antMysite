@@ -89,7 +89,7 @@ export const miniProjects = [
   {
     id: 'm1',
     title: 'iwop 웹사이트 리메이크',
-    description: '3d 넣어서 iwop 웹사이트 리메이크 함',
+    description: '3d 넣어서 iwop 웹사이트 리메이크 함(망한거임)',
     link: 'https://foriwop.pages.dev/'
   },
 ];
