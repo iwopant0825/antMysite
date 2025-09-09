@@ -14,7 +14,7 @@ export default function App() {
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     // 고정 2초 로딩
-    const t = setTimeout(() => setLoaded(true), 2000);
+    const t = setTimeout(() => setLoaded(true), 1000);
     return () => clearTimeout(t);
   }, []);
   return (
