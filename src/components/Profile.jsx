@@ -132,7 +132,7 @@ const Kicker = styled.h3`
 `;
 
 const Paragraph = styled.p`
-  color: #666;
+  color: #151515;
   line-height: 1.6;
 `;
 

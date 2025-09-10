@@ -159,7 +159,7 @@ const Nav = styled.nav`
 
 const NavAnchor = styled.a`
   text-decoration: none;
-  color: ${({ theme }) => theme.colors.textSubtle};
+  color: #000000;
   font-size: 14px;
   cursor: pointer;
   outline: none;
