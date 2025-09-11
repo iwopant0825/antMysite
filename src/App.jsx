@@ -1,19 +1,19 @@
-import Hero from "./components/Hero";
-import Header from "./components/Header";
-import Profile from "./components/Profile";
-import Skills from "./components/Skills";
-import Immersion from "./components/Immersion";
-import Projects from "./components/Projects";
-import Timeline from "./components/Timeline";
-import Footer from "./components/Footer";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState, lazy } from "react";
 import Loading from "./components/Loading";
 import CursorGlass from "./components/CursorGlass";
+
+const Header = lazy(() => import("./components/Header"));
+const Hero = lazy(() => import("./components/Hero"));
+const Profile = lazy(() => import("./components/Profile"));
+const Skills = lazy(() => import("./components/Skills"));
+const Timeline = lazy(() => import("./components/Timeline"));
+const Projects = lazy(() => import("./components/Projects"));
+const Footer = lazy(() => import("./components/Footer"));
 
 export default function App() {
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    // 고정 2초 로딩
+    // 고정 1초 로딩
     const t = setTimeout(() => setLoaded(true), 1000);
     return () => clearTimeout(t);
   }, []);
@@ -22,16 +22,18 @@ export default function App() {
       <CursorGlass />
       <Loading done={loaded} />
       {loaded && (
-        <>
-          <Header />
-          <Hero />
-          <Profile />
-          {/* <Immersion /> */}
-          <Skills />
-          <Timeline />
-          <Projects />
-          <Footer />
-        </>
+        <Suspense fallback={null}>
+          <>
+            <Header />
+            <Hero />
+            <Profile />
+            {/* <Immersion /> */}
+            <Skills />
+            <Timeline />
+            <Projects />
+            <Footer />
+          </>
+        </Suspense>
       )}
     </>
   );
