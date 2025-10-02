@@ -10,6 +10,8 @@ export const projects = [
         demo: '#',
         github: 'https://github.com/SaveQuest/frontend.git',
         tech: ['React Native', 'Figma','Framer Motion','Typescript'],
+        role: '프론트엔드 개발(React Native) · UI/UX 설계 · 모션 구현',
+        ai: '생성형 이미지로 아이템/캐릭터 일러스트 제작 · 스타일 가이드 일관화',
       },
       {
         id: 'p2',
@@ -20,6 +22,8 @@ export const projects = [
         demo: '#',
         github: '#',
         tech: ['React Native', 'Figma'],
+        role: '프로토타이핑 · 프론트엔드 개발(React Native) · UX 플로우 설계',
+        ai: 'AI 미사용',
       },
       {
         id: 'p3',
@@ -30,6 +34,8 @@ export const projects = [
         demo: 'https://bayabastest.pages.dev/',
         github: '#',
         tech: ['React Native', 'Figma'],
+        role: 'App to Web 전환 · 프론트엔드 통합 · 퍼포먼스 최적화 · 배포',
+        ai: '두피 이미지 분석: 커스텀/클라우드 비전 모델로 홍반·각질·유분 등 다중 라벨 분류(전처리: 잡음 제거/색상 정규화) 생활 패턴 설문 해석: LLM으로 응답 요약·리스크 스코어 산출 개인화 추천: 분류 결과+설문 스코어를 룰엔진/프롬프트 체인으로 결합해 맞춤 케어 루틴 제안 상담 보조: LLM 기반 질의응답으로 제품 사용법/주의사항 즉답',
       },
       {
         id: 'p4',
@@ -40,6 +46,8 @@ export const projects = [
         demo: 'https://laum.pages.dev/',
         github: 'https://github.com/iwopant0825/LAUM.git',
         tech: ['React', 'Figma'],
+        role: '디자인 · 프론트엔드 개발 · 배포 자동화',
+        ai: 'AI 미사용',
       },      
       {
         id: 'p5',
@@ -50,6 +58,8 @@ export const projects = [
         demo: 'https://museumcbg.pages.dev/',
         github: 'https://github.com/iwopant0825/MuseumCBG.git',
         tech: ['React', 'Figma'],
+        role: '3D 인터랙션 설계 · 프론트엔드 개발 · 퍼포먼스 튜닝',
+        ai: '각 문화유산 소개 페이지 자동 생성: 자료 요약/정리와 섹션 구성 텍스트를 LLM으로 생성해 대량 페이지 제작 효율화',
       },  
       {
         id: 'p6',
@@ -60,6 +70,8 @@ export const projects = [
         demo: 'https://climation.pages.dev',
         github: 'https://github.com/iwopant0825/Climation.git',
         tech: ['React', 'Figma'],
+        role: '브랜딩 · 정보 구조 설계 · 프론트엔드 개발',
+        ai: 'AI 미사용',
       },  
       {
         id: 'p7',
@@ -70,6 +82,8 @@ export const projects = [
         demo: 'https://restlye.pages.dev',
         github: 'https://github.com/iwopant0825/REstlye.git',
         tech: ['React', 'Figma'],
+        role: '브랜딩 · 웹사이트 제작 · 콘텐츠 운영',
+        ai: 'AI 미사용',
       },  
       {
         id: 'p8',
@@ -80,6 +94,8 @@ export const projects = [
         demo: 'https://aigs.pages.dev',
         github: 'https://github.com/iwopant0825/AiGS.git',
         tech: ['React', 'Figma'],
+        role: '아키텍처 설계 · 프론트엔드 개발 · AI 워크플로우 통합',
+        ai: 'LLM 기반 문서 요약/질의응답 · 간단한 분류/예측 모델을 통한 자동화',
       },  
       
 ];

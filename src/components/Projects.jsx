@@ -35,6 +35,22 @@ export default function Projects() {
                 <CardBody>
                   <CardTitle>{p.title}</CardTitle>
                   <CardText>{p.description}</CardText>
+                  {(p.role || p.ai) && (
+                    <Meta>
+                      {p.role && (
+                        <MetaItem>
+                          <MetaLabel>역할</MetaLabel>
+                          <MetaValue>{p.role}</MetaValue>
+                        </MetaItem>
+                      )}
+                      {p.ai && (
+                        <MetaItem>
+                          <MetaLabel>AI 활용</MetaLabel>
+                          <MetaValue>{p.ai}</MetaValue>
+                        </MetaItem>
+                      )}
+                    </Meta>
+                  )}
                   {(showDemo || showGit) && (
                     <Actions>
                       {showDemo && (
@@ -307,4 +323,29 @@ const CardText = styled.p`
   color: #3b3f45;
   line-height: 1.65;
   margin-top: 6px;
+`;
+
+const Meta = styled.div`
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+`;
+
+const MetaItem = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+`;
+
+const MetaLabel = styled.span`
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: #6b6f76;
+  min-width: 56px;
+`;
+
+const MetaValue = styled.span`
+  font-size: 13px;
+  color: #000000;
+  line-height: 1.6;
 `;
