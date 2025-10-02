@@ -11,7 +11,7 @@ export const projects = [
         github: 'https://github.com/SaveQuest/frontend.git',
         tech: ['React Native', 'Figma','Framer Motion','Typescript'],
         role: '프론트엔드 개발(React Native) · UI/UX 설계 · 모션 구현',
-        ai: '생성형 이미지로 아이템/캐릭터 일러스트 제작 · 스타일 가이드 일관화',
+        ai: '생성형 이미지 모델을 활용하여 아이템 및 캐릭터 일러스트 제작 · 일관된 비주얼을 위해 스타일 가이드 자동화',
       },
       {
         id: 'p2',
@@ -59,7 +59,7 @@ export const projects = [
         github: 'https://github.com/iwopant0825/MuseumCBG.git',
         tech: ['React', 'Figma'],
         role: '3D 인터랙션 설계 · 프론트엔드 개발 · 퍼포먼스 튜닝',
-        ai: '각 문화유산 소개 페이지 자동 생성: 자료 요약/정리와 섹션 구성 텍스트를 LLM으로 생성해 대량 페이지 제작 효율화',
+        ai: 'LLM을 이용하여 문화유산 소개 텍스트 자동 생성 · 자료 요약 및 섹션 구성을 자동화하여 다수의 전시 페이지 제작 효율화',
       },  
       {
         id: 'p6',
@@ -83,7 +83,7 @@ export const projects = [
         github: 'https://github.com/iwopant0825/REstlye.git',
         tech: ['React', 'Figma'],
         role: '브랜딩 · 웹사이트 제작 · 콘텐츠 운영',
-        ai: 'AI 미사용',
+        ai: '디자인 단계에서 생성형 AI를 활용해 다양한 업사이클링 스타일 시안을 빠르게 제작 · 색상 조합·소재 매칭 아이디어를 AI 이미지 툴로 실험하여 브랜딩 방향성 확보 · 개발 단계에서는 AI 코딩 보조 도구를 사용해 반응형 레이아웃, styled-components 기반 컴포넌트를 신속히 구현',
       },  
       {
         id: 'p8',
@@ -95,7 +95,7 @@ export const projects = [
         github: 'https://github.com/iwopant0825/AiGS.git',
         tech: ['React', 'Figma'],
         role: '아키텍처 설계 · 프론트엔드 개발 · AI 워크플로우 통합',
-        ai: 'LLM 기반 문서 요약/질의응답 · 간단한 분류/예측 모델을 통한 자동화',
+        ai: '서비스 아키텍처 구상 단계에서 AI 도구를 활용해 초기 설계안 시각화 및 플로우 차트 자동 생성 · 개발 단계에서는 AI 코딩 보조 도구(바이브 코딩)로 컴포넌트 단위 프로토타이핑을 빠르게 반복',
       },  
       
 ];
