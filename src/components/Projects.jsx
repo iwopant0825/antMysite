@@ -43,12 +43,12 @@ export default function Projects() {
                           <MetaValue>{p.role}</MetaValue>
                         </MetaItem>
                       )}
-                      {p.ai && (
+                      {/* {p.ai && (
                         <MetaItem>
                           <MetaLabel>AI 활용</MetaLabel>
                           <MetaValue>{p.ai}</MetaValue>
                         </MetaItem>
-                      )}
+                      )} */}
                     </Meta>
                   )}
                   {(showDemo || showGit) && (
